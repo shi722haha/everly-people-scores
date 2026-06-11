@@ -123,6 +123,16 @@
   .th2{ font-size:10.5px; font-weight:700; color:#46504A; margin:10px 0 6px; }
   .dnote{ font-size:10.5px; color:#9AA4A0; line-height:1.55; margin-top:9px; padding-top:9px; border-top:1px dashed #ECF1EE; }
 
+  /* 可拖拽排序的板块 */
+  .draghint{ font-size:10px; color:#AEB6B1; margin:0 4px 8px; display:flex; align-items:center; gap:4px; }
+  .block{ position:relative; border-radius:16px; transition:opacity .15s, box-shadow .15s; }
+  .block.dragging{ opacity:.4; box-shadow:0 8px 24px rgba(40,70,60,.18); }
+  .block + .block{ margin-top:2px; }
+  .grip{ position:absolute; top:3px; right:5px; z-index:3; font-size:12px; color:#B6C0BA;
+         background:#fff; border:1px solid #E8EFEB; border-radius:7px; padding:1px 7px; line-height:18px;
+         cursor:grab; user-select:none; box-shadow:0 1px 4px rgba(70,120,105,.08); }
+  .grip:active{ cursor:grabbing; }
+
   .sechead{ font-size:11.5px; font-weight:700; color:#9AA4A0; letter-spacing:.5px; margin:14px 4px 8px; }
 
   /* 因素行 */
@@ -496,6 +506,34 @@ function spark(sc){
 
 let active = 0;
 
+/* 用户可手动拖动板块排序，顺序记到 localStorage */
+const DEFAULT_ORDER = ["meal","macro","deep","factors","recipes"];
+let BLOCK_ORDER = (()=>{ try{ return JSON.parse(localStorage.getItem("everly_block_order")) || null; }catch(e){ return null; } })() || DEFAULT_ORDER.slice();
+
+function afterEl(cont, y){
+  const els = [...cont.querySelectorAll(".block:not(.dragging)")];
+  return els.reduce((c, ch)=>{ const b=ch.getBoundingClientRect(); const o=y-b.top-b.height/2;
+    return (o<0 && o>c.offset) ? {offset:o, element:ch} : c; }, {offset:-Infinity}).element;
+}
+function saveOrder(){
+  const cont = document.getElementById("blocks"); if(!cont) return;
+  BLOCK_ORDER = [...cont.querySelectorAll(".block")].map(b=>b.dataset.key);
+  try{ localStorage.setItem("everly_block_order", JSON.stringify(BLOCK_ORDER)); }catch(e){}
+}
+function attachDrag(){
+  const cont = document.getElementById("blocks"); if(!cont) return;
+  cont.querySelectorAll(".block").forEach(bl=>{
+    bl.addEventListener("dragstart", e=>{ bl.classList.add("dragging"); e.dataTransfer.effectAllowed="move"; });
+    bl.addEventListener("dragend", ()=>{ bl.classList.remove("dragging"); saveOrder(); });
+  });
+  cont.addEventListener("dragover", e=>{
+    e.preventDefault();
+    const dragging = cont.querySelector(".dragging"); if(!dragging) return;
+    const after = afterEl(cont, e.clientY);
+    if(after == null) cont.appendChild(dragging); else cont.insertBefore(dragging, after);
+  });
+}
+
 function markClass(mark, band){
   if(mark < band[0]-2) return "mk-lo";
   if(mark > band[1]+2) return "mk-hi";
@@ -612,6 +650,29 @@ function renderBody(){
   const x = EXTRA[p.key];
   const sc = computeScore(p);
   const col = scoreColor(sc);
+  // 各板块内容（可拖拽排序）
+  const B = {
+    meal: `<div class="mealhd">🍽 今天吃了什么 <span class="mr">共 ${p.meals.length} 餐</span></div>
+           <div class="mealrow">${p.meals.map(mealCard).join("")}</div>`,
+    macro: `<div class="macro">
+        <div class="mt"><span>今日宏量 · 净能量</span><span class="net">${x.macros.net}</span></div>
+        <div class="mg">
+          ${macroBar("脂肪",x.macros.f,"#7FA8E0")}
+          ${macroBar("碳水",x.macros.c,"#E3B34D")}
+          ${macroBar("蛋白",x.macros.p,"#E07BA0")}
+        </div></div>`,
+    factors: `<div class="sechead">★ 这个群体最看重（排在最前）</div>
+        ${p.priority.map(rowHTML).join("")}
+        <div class="sechead">基础营养 · 按常规标准</div>
+        ${p.base.map(rowHTML).join("")}`,
+    recipes: `<div class="sechead">🍳 换着吃 · 适合${p.name}的菜谱</div>
+        ${x.recipes.map(recipeCard).join("")}`,
+  };
+  if(x.deep) B.deep = deepHTML(x.deep);
+  const order = [...BLOCK_ORDER.filter(k=>B[k]), ...Object.keys(B).filter(k=>!BLOCK_ORDER.includes(k))];
+  const blocks = order.map(k =>
+    `<div class="block" draggable="true" data-key="${k}"><div class="grip">⠿</div>${B[k]}</div>`).join("");
+
   document.getElementById("scroll").innerHTML = `
     <div class="hero">
       <div class="ring" style="background:conic-gradient(${col} 0 ${sc}%, #EAF1EE ${sc}% 100%)">
@@ -623,30 +684,12 @@ function renderBody(){
         <div class="spark">${spark(sc)}<span class="sl">近 7 天 · ${scoreWord(sc)}</span></div>
       </div>
     </div>
-
-    <div class="mealhd">🍽 今天吃了什么 <span class="mr">共 ${p.meals.length} 餐</span></div>
-    <div class="mealrow">${p.meals.map(mealCard).join("")}</div>
-
-    <div class="macro">
-      <div class="mt"><span>今日宏量 · 净能量</span><span class="net">${x.macros.net}</span></div>
-      <div class="mg">
-        ${macroBar("脂肪",x.macros.f,"#7FA8E0")}
-        ${macroBar("碳水",x.macros.c,"#E3B34D")}
-        ${macroBar("蛋白",x.macros.p,"#E07BA0")}
-      </div>
-    </div>
-
     <div class="creed">${p.creed}</div>
-    ${x.deep ? deepHTML(x.deep) : ""}
-    <div class="sechead">★ 这个群体最看重（排在最前）</div>
-    ${p.priority.map(rowHTML).join("")}
-    <div class="sechead">基础营养 · 按常规标准</div>
-    ${p.base.map(rowHTML).join("")}
+    <div class="draghint">⠿ 按住卡片右上角手柄可拖动排序（顺序会记住）</div>
+    <div id="blocks">${blocks}</div>
 
-    <div class="sechead">🍳 换着吃 · 适合${p.name}的菜谱</div>
-    ${x.recipes.map(recipeCard).join("")}
-
-    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-11 17:29:00</span></div>`;
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-11 17:48:36</span></div>`;
+  attachDrag();
   document.getElementById("scroll").scrollTop = 0;
 }
 function select(i){ active=i; renderPeople(); renderBody(); }
