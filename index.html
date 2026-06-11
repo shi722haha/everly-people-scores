@@ -449,9 +449,10 @@ const PIC = {
   "杂粮饭 + 清蒸鸡":"r_multigrain","凉拌菠菜豆腐":"r_spinachtofu","无糖豆浆 + 水煮蛋":"r_soyegg",
   "山药小米粥":"r_yam","清蒸鳕鱼":"r_cod","南瓜蒸蛋":"r_pumpkinegg",
 };
+const BUILD = Date.now();   /* 缓存破坏：每次加载用新版本号，换图后普通刷新即可见 */
 function aimg(name){
   const k = PIC[name];
-  return k ? `img/${k}.jpg` : "img/rice.jpg";
+  return (k ? `img/${k}.jpg` : "img/rice.jpg") + `?v=${BUILD}`;
 }
 function spark(sc){
   const t=[sc-7,sc-2,sc-5,sc+3,sc-1,sc+2,sc].map(v=>Math.max(35,Math.min(98,v)));
@@ -598,7 +599,7 @@ function renderBody(){
     <div class="sechead">🍳 换着吃 · 适合${p.name}的菜谱</div>
     ${x.recipes.map(recipeCard).join("")}
 
-    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-11 17:03:44</span></div>`;
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-11 17:10:23</span></div>`;
   document.getElementById("scroll").scrollTop = 0;
 }
 function select(i){ active=i; renderPeople(); renderBody(); }
