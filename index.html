@@ -107,10 +107,15 @@
   .creed{ font-size:12px; line-height:1.6; color:#7C867F; margin:10px 4px 12px; }
   .creed b{ color:#2F8E72; font-weight:600; }
 
-  /* 深度块：肠胃影响因素 / 产后身体账本（这两类做更厚） */
+  /* 深度块 = AI 洞察模块：肠胃影响因素 / 产后身体账本（这两类做更厚） */
   .deep{ background:#fff; border-radius:16px; padding:13px 15px; margin:0 0 10px;
          box-shadow:0 3px 12px rgba(70,120,105,.06); border:1px solid #E6F0EB; }
-  .deep .dt{ font-size:12.5px; font-weight:700; color:#2F8E72; margin-bottom:11px; }
+  .deep.insight{ background:linear-gradient(180deg,#F2FBF7,#FFFFFF 55%); border:1px solid #D5EADF; }
+  .ai-eyebrow{ display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:700;
+               color:#3E9E78; letter-spacing:.3px; background:#E7F5EE; border-radius:7px; padding:3px 9px; }
+  .ai-lead{ font-size:12px; line-height:1.6; color:#46504A; background:#fff; border:1px solid #E4F0EA;
+            border-radius:11px; padding:10px 12px; margin:9px 0 12px; box-shadow:0 1px 6px rgba(70,120,105,.05); }
+  .deep .dt{ font-size:12.5px; font-weight:700; color:#2F8E72; margin:9px 0 4px; }
   .tier{ margin-bottom:10px; }
   .tier .th{ font-size:11px; font-weight:700; color:#46504A; margin-bottom:5px; display:flex; align-items:center; gap:6px; }
   .tier .dot{ width:8px; height:8px; border-radius:50%; flex:none; }
@@ -425,6 +430,7 @@ const EXTRA = {
   mom:{ title:"奶量优先，别急着减 ✨",
     macros:{f:[60,70],c:[200,220],p:[90,100],net:"够 · 含泌乳 +400 kcal"},
     deep:{ title:"📒 母亲的身体账本 · 为你，不为奶量",
+      lead:"你还在泌乳期，身体每天多支出约 400 kcal——别急着减。今天 DHA 够了，但铁、碘、热量还差一口，先把这几样补上。",
       ledger:[
         {k:"进账",v:"今天吃进的能量 + 蛋白 / 铁 / 碘 / DHA"},
         {k:"出账",v:"基础代谢 + 活动 + <b>哺乳消耗 ≈ +400 kcal</b>（透支你身体的账）"},
@@ -457,6 +463,7 @@ const EXTRA = {
   gut:{ title:"今天条条踩雷 ⚠️",
     macros:{f:[55,45],c:[180,200],p:[40,70],net:"偏少"},
     deep:{ title:"🔬 影响你肠胃的因素（不只是食物）",
+      lead:"你这几天在出差、作息被打乱，肠胃比平时更脆弱。今天的雷主要来自空腹咖啡和那顿麻辣香锅——不全是食物本身，压力和睡眠也在拖后腿。",
       tiers:[
         {k:"确认诱因",sub:"已多信号交叉验证",color:"red",items:["空腹喝咖啡","出差·作息打乱","高脂·油炸","高FODMAP(豆/蒜)","辛辣刺激"]},
         {k:"观察中",sub:"证据攒够才升为确认",color:"amber",items:["睡眠不足","压力大","睡前进食","两餐间隔太长","吃太快"]},
@@ -507,8 +514,9 @@ function spark(sc){
 let active = 0;
 
 /* 用户可手动拖动板块排序，顺序记到 localStorage */
-const DEFAULT_ORDER = ["meal","macro","deep","factors","recipes"];
-let BLOCK_ORDER = (()=>{ try{ return JSON.parse(localStorage.getItem("everly_block_order")) || null; }catch(e){ return null; } })() || DEFAULT_ORDER.slice();
+const DEFAULT_ORDER = ["meal","macro","recipes","deep","factors"];   /* 宏量+菜谱紧跟“今天吃了什么”，AI洞察其后 */
+const ORDER_KEY = "everly_block_order_v2";
+let BLOCK_ORDER = (()=>{ try{ return JSON.parse(localStorage.getItem(ORDER_KEY)) || null; }catch(e){ return null; } })() || DEFAULT_ORDER.slice();
 
 function afterEl(cont, y){
   const els = [...cont.querySelectorAll(".block:not(.dragging)")];
@@ -518,7 +526,7 @@ function afterEl(cont, y){
 function saveOrder(){
   const cont = document.getElementById("blocks"); if(!cont) return;
   BLOCK_ORDER = [...cont.querySelectorAll(".block")].map(b=>b.dataset.key);
-  try{ localStorage.setItem("everly_block_order", JSON.stringify(BLOCK_ORDER)); }catch(e){}
+  try{ localStorage.setItem(ORDER_KEY, JSON.stringify(BLOCK_ORDER)); }catch(e){}
 }
 function attachDrag(){
   const cont = document.getElementById("blocks"); if(!cont) return;
@@ -630,16 +638,19 @@ function recipeCard(r){
   </div>`;
 }
 function deepHTML(d){
+  const head = `<div class="ai-eyebrow">✨ AI 洞察 · 基于你的数据生成</div>
+    <div class="dt">${d.title}</div>
+    ${d.lead ? `<div class="ai-lead">${d.lead}</div>` : ""}`;
   if(d.tiers){
     const col={red:["#D9803F","#FBEFE6"],amber:["#C99A2E","#FAF4E4"],green:["#2F8E72","#E5F3EC"]};
-    return `<div class="deep"><div class="dt">${d.title}</div>
+    return `<div class="deep insight">${head}
       ${d.tiers.map(t=>{const c=col[t.color];return `
         <div class="tier"><div class="th"><span class="dot" style="background:${c[0]}"></span>${t.k}<span class="sub">${t.sub}</span></div>
           <div class="chips">${t.items.map(i=>`<span class="c" style="color:${c[0]};background:${c[1]}">${i}</span>`).join("")}</div>
         </div>`;}).join("")}
       <div class="dnote">${d.note}</div></div>`;
   }
-  return `<div class="deep"><div class="dt">${d.title}</div>
+  return `<div class="deep insight">${head}
     <div class="ldg">${d.ledger.map(l=>`<div class="row2"><span class="lk">${l.k}</span><span class="lv">${l.v}</span></div>`).join("")}</div>
     <div class="th2">非食物维度 · 影响你今天要补多少</div>
     <div class="chips">${d.factors.map(f=>`<span class="c" style="color:#7C6FB0;background:#F1EFF9">${f}</span>`).join("")}</div>
@@ -688,7 +699,7 @@ function renderBody(){
     <div class="draghint">⠿ 按住卡片右上角手柄可拖动排序（顺序会记住）</div>
     <div id="blocks">${blocks}</div>
 
-    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-11 17:48:36</span></div>`;
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-11 18:03:09</span></div>`;
   attachDrag();
   document.getElementById("scroll").scrollTop = 0;
 }
