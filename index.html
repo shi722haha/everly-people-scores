@@ -385,6 +385,9 @@ const PEOPLE = [
 },
 ];
 
+/* 人群展示顺序：肠胃脆弱第1、产后第2，其余顺延 */
+PEOPLE.sort((a,b)=>{const o=["gut","mom","gym","old","veg","glu"];return o.indexOf(a.key)-o.indexOf(b.key);});
+
 /* Oura/Bevel 借鉴的附加要素 + 小卡(食材替换)/胃之书(八大菜系食谱)的菜谱推荐，按人群分 */
 const EXTRA = {
   gym:{ title:"训练日补给到位 ✨",
