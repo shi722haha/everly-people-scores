@@ -64,6 +64,47 @@
   .slot .sit{ display:flex; flex-wrap:wrap; gap:5px; }
   .slot .it{ background:#F3F7F5; border-radius:7px; padding:2px 9px; font-size:11.5px; color:#525C55; }
 
+  /* hero 里的 AI 总结 + 趋势 */
+  .hx .ait{ font-size:13.5px; font-weight:700; color:#2E3A35; margin-bottom:4px; }
+  .spark{ display:flex; align-items:center; gap:6px; margin-top:7px; }
+  .spark .sl{ font-size:9.5px; color:#A8B2AC; }
+
+  /* 今日餐食 · AIGC 图卡（横滑） */
+  .mealhd{ font-size:13px; font-weight:700; color:#46504A; margin:6px 4px 8px; display:flex; align-items:center; justify-content:space-between; }
+  .mealhd .mr{ font-size:10.5px; color:#A8B2AC; font-weight:500; }
+  .mealrow{ display:flex; gap:10px; overflow-x:auto; padding:1px 0 8px; scrollbar-width:none; }
+  .mealrow::-webkit-scrollbar{ display:none; }
+  .mcard{ flex:none; width:140px; background:#fff; border-radius:15px; overflow:hidden;
+          box-shadow:0 3px 12px rgba(70,120,105,.07); }
+  .mcard .imgwrap{ position:relative; height:98px; background:#E9EFEC; }
+  .mcard img{ width:100%; height:98px; object-fit:cover; display:block; transition:opacity .4s; }
+  .mcard .ph{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+              font-size:30px; background:linear-gradient(135deg,#EDF3F0,#E3ECE8); }
+  .mcard .mc{ padding:8px 10px 10px; }
+  .mc .mh{ font-size:10px; color:#9AA4A0; font-weight:600; display:flex; justify-content:space-between; }
+  .mc .mn{ font-size:12.5px; font-weight:600; margin:3px 0 7px; line-height:1.25; color:#2E3A35; }
+  .qtag{ font-size:9.5px; font-weight:700; padding:2px 8px; border-radius:6px; display:inline-block; }
+
+  /* 宏量 + 净能量（Bevel） */
+  .macro{ background:#fff; border-radius:16px; padding:12px 14px; margin:0 0 6px; box-shadow:0 3px 12px rgba(70,120,105,.05); }
+  .macro .mt{ font-size:11px; font-weight:700; color:#9AA4A0; letter-spacing:.5px; margin-bottom:9px; display:flex; justify-content:space-between; }
+  .macro .mt .net{ color:#6A746E; font-weight:600; }
+  .mg{ display:flex; gap:12px; }
+  .mg .one{ flex:1; }
+  .mg .lab{ font-size:11px; color:#6A746E; display:flex; justify-content:space-between; margin-bottom:4px; }
+  .mg .lab b{ font-weight:700; color:#2E3A35; }
+  .mg .bar{ height:5px; background:#EEF2F0; border-radius:3px; overflow:hidden; }
+  .mg .bf{ height:5px; border-radius:3px; }
+
+  /* 换着吃 · 菜谱（小卡 + 胃之书） */
+  .rcard{ display:flex; gap:11px; background:#fff; border-radius:15px; padding:10px; margin-bottom:8px; box-shadow:0 3px 12px rgba(70,120,105,.05); }
+  .rcard .rimg{ width:76px; height:76px; border-radius:11px; object-fit:cover; flex:none; background:#E9EFEC; }
+  .rx{ flex:1; min-width:0; }
+  .rx .rn{ font-size:13.5px; font-weight:700; color:#2E3A35; }
+  .rx .cui{ font-size:9.5px; color:#2F8E72; background:#EFF8F4; border:1px solid #DDEEE7; border-radius:5px; padding:1px 6px; margin-left:6px; font-weight:600; }
+  .rx .rf{ font-size:11.5px; color:#525C55; margin:5px 0; line-height:1.45; }
+  .rx .rs{ font-size:10.5px; color:#B5762E; background:#FBF4E9; border-radius:6px; padding:3px 8px; display:inline-flex; gap:4px; }
+
   .creed{ font-size:12px; line-height:1.6; color:#7C867F; margin:10px 4px 12px; }
   .creed b{ color:#2F8E72; font-weight:600; }
 
@@ -142,7 +183,11 @@
 const PEOPLE = [
 {
   key:"gym", emoji:"💪", name:"健身增肌",
-  meals:[{s:"早餐",ic:"🌅",items:["燕麦+乳清蛋白","鸡蛋×2"]},{s:"午餐",ic:"☀️",items:["鸡胸","米饭","西兰花"]},{s:"练后",ic:"🍌",items:["香蕉","蛋白粉"]},{s:"晚餐",ic:"🌙",items:["牛肉","红薯"]}],
+  meals:[
+    {s:"早餐",ic:"🌅",t:"7:30",dish:"燕麦乳清碗",q:3,img:"oatmeal bowl with whey protein and boiled eggs",items:["燕麦+乳清","鸡蛋×2"]},
+    {s:"午餐",ic:"☀️",t:"12:30",dish:"鸡胸米饭西兰花",q:3,img:"grilled chicken breast with white rice and broccoli",items:["鸡胸","米饭","西兰花"]},
+    {s:"练后",ic:"🍌",t:"16:00",dish:"香蕉蛋白奶昔",q:2,img:"banana protein shake with banana",items:["香蕉","蛋白粉"]},
+    {s:"晚餐",ic:"🌙",t:"19:30",dish:"牛肉红薯",q:3,img:"beef steak with roasted sweet potato",items:["牛肉","红薯"]}],
   read:"蛋白、碳水、脂肪都踩在目标带上，今天吃得很对路。",
   creed:"训练量大、要长肌肉。<b>蛋白、复合碳水、优质脂肪的区间整体上移</b>——别人眼里的“多”，对他正好够。",
   priority:[
@@ -172,7 +217,12 @@ const PEOPLE = [
 },
 {
   key:"mom", emoji:"🤱", name:"哺乳产后",
-  meals:[{s:"早餐",ic:"🌅",items:["小米粥","鸡蛋"]},{s:"午餐",ic:"☀️",items:["瘦牛肉","菠菜","米饭"]},{s:"加餐",ic:"🥜",items:["坚果一把"]},{s:"晚餐",ic:"🌙",items:["三文鱼","蔬菜"]},{s:"饮品",ic:"☕",items:["咖啡×2"]}],
+  meals:[
+    {s:"早餐",ic:"🌅",t:"7:00",dish:"小米粥鸡蛋",q:2,img:"millet porridge with boiled egg chinese breakfast",items:["小米粥","鸡蛋"]},
+    {s:"午餐",ic:"☀️",t:"12:00",dish:"瘦牛肉菠菜饭",q:3,img:"beef with spinach and rice chinese home cooking",items:["瘦牛肉","菠菜","米饭"]},
+    {s:"加餐",ic:"🥜",t:"15:00",dish:"坚果一把",q:2,img:"bowl of mixed nuts",items:["坚果一把"]},
+    {s:"晚餐",ic:"🌙",t:"18:30",dish:"三文鱼蔬菜",q:3,img:"steamed salmon with vegetables",items:["三文鱼","蔬菜"]},
+    {s:"饮品",ic:"☕",t:"全天",dish:"咖啡×2",q:1,img:"two cups of coffee",items:["咖啡×2"]}],
   read:"DHA 够了，但铁、碘、热量还没补到位——别急着减。",
   creed:"刚生产、还在泌乳，全身修复期。<b>要“吃够”不是“少吃”</b>——能量、碘、铁都从谷底往上补，绝不和孕前比。",
   priority:[
@@ -202,7 +252,11 @@ const PEOPLE = [
 },
 {
   key:"old", emoji:"👵", name:"老年 65+",
-  meals:[{s:"早餐",ic:"🌅",items:["白粥","咸菜"]},{s:"午餐",ic:"☀️",items:["少量米饭","炖菜"]},{s:"晚餐",ic:"🌙",items:["面条"]},{s:"全天",ic:"💧",items:["喝水少"]}],
+  meals:[
+    {s:"早餐",ic:"🌅",t:"7:00",dish:"白粥咸菜",q:0,img:"plain rice porridge with pickles chinese",items:["白粥","咸菜"]},
+    {s:"午餐",ic:"☀️",t:"11:30",dish:"米饭炖菜",q:1,img:"braised vegetables with rice chinese home cooking",items:["少量米饭","炖菜"]},
+    {s:"晚餐",ic:"🌙",t:"17:30",dish:"面条",q:1,img:"bowl of noodle soup chinese",items:["面条"]},
+    {s:"全天",ic:"💧",t:"—",dish:"喝水少",q:0,img:"half empty glass of water",items:["喝水少"]}],
   read:"蛋白严重不足、钠偏高——今天对长肌肉和血压都不利。",
   creed:"以为上年纪要“吃清淡吃少”——但<b>防肌少症蛋白反而要更多</b>，维D、B12 因吸收下降要专门补。尺子和年轻人相反。",
   priority:[
@@ -232,7 +286,10 @@ const PEOPLE = [
 },
 {
   key:"veg", emoji:"🥗", name:"素食",
-  meals:[{s:"早餐",ic:"🌅",items:["燕麦","豆浆"]},{s:"午餐",ic:"☀️",items:["豆腐","糙米","西兰花"]},{s:"晚餐",ic:"🌙",items:["鹰嘴豆沙拉","坚果"]}],
+  meals:[
+    {s:"早餐",ic:"🌅",t:"7:30",dish:"燕麦豆浆",q:2,img:"oatmeal with soy milk vegetarian breakfast",items:["燕麦","豆浆"]},
+    {s:"午餐",ic:"☀️",t:"12:30",dish:"豆腐糙米西兰花",q:3,img:"tofu with brown rice and broccoli vegan",items:["豆腐","糙米","西兰花"]},
+    {s:"晚餐",ic:"🌙",t:"18:30",dish:"鹰嘴豆沙拉",q:3,img:"chickpea salad with nuts vegan bowl",items:["鹰嘴豆沙拉","坚果"]}],
   read:"蛋白和钙不错，但 B12、铁、锌这几样长期缺口还得补。",
   creed:"蔬果全谷天然占优，真正要盯的是<b>植物饮食容易缺的几样</b>——B12、铁、锌。看的是长期累积缺口，不是一餐定胜负。",
   priority:[
@@ -262,7 +319,11 @@ const PEOPLE = [
 },
 {
   key:"glu", emoji:"🩺", name:"自报控糖",
-  meals:[{s:"早餐",ic:"🌅",items:["白馒头","粥"]},{s:"午餐",ic:"☀️",items:["米饭","红烧肉"]},{s:"加餐",ic:"🧋",items:["奶茶一杯"]},{s:"晚餐",ic:"🌙",items:["面条"]}],
+  meals:[
+    {s:"早餐",ic:"🌅",t:"7:30",dish:"白馒头粥",q:0,img:"steamed white bun with rice porridge chinese",items:["白馒头","粥"]},
+    {s:"午餐",ic:"☀️",t:"12:30",dish:"米饭红烧肉",q:1,img:"braised pork belly with white rice chinese",items:["米饭","红烧肉"]},
+    {s:"加餐",ic:"🧋",t:"15:00",dish:"奶茶一杯",q:0,img:"glass of bubble milk tea",items:["奶茶一杯"]},
+    {s:"晚餐",ic:"🌙",t:"19:00",dish:"面条",q:1,img:"bowl of noodles chinese",items:["面条"]}],
   read:"精制碳水和糖叠太满，纤维和蔬菜太少——今天血糖不友好。",
   creed:"用户主动说在控糖，于是<b>和血糖相关的因素权重整体改写</b>——糖与精制碳水重减、纤维与低GI重加。我们只帮她留意，绝不诊断、不命名疾病。",
   priority:[
@@ -292,7 +353,10 @@ const PEOPLE = [
 },
 {
   key:"gut", emoji:"🌿", name:"肠胃脆弱",
-  meals:[{s:"早餐",ic:"🌅",items:["豆浆","油条"]},{s:"午餐",ic:"☀️",items:["麻辣香锅"]},{s:"晚餐",ic:"🌙",items:["稀饭","咸菜"]}],
+  meals:[
+    {s:"早餐",ic:"🌅",t:"7:30",dish:"豆浆油条",q:0,img:"soy milk with fried dough sticks youtiao chinese",items:["豆浆","油条"]},
+    {s:"午餐",ic:"☀️",t:"12:30",dish:"麻辣香锅",q:0,img:"spicy mala xiang guo sichuan",items:["麻辣香锅"]},
+    {s:"晚餐",ic:"🌙",t:"18:30",dish:"稀饭咸菜",q:1,img:"rice porridge with pickles chinese",items:["稀饭","咸菜"]}],
   read:"高FODMAP、辣、油炸全踩了——今天对肠胃几乎条条是雷。",
   creed:"敏感不等于“纤维=坏、越少越好”。<b>纤维照样吃够，只是换可溶、温和、慢慢加</b>；真正减分的是产气、高脂、刺激这些诱因。",
   priority:[
@@ -321,6 +385,75 @@ const PEOPLE = [
   ]
 },
 ];
+
+/* Oura/Bevel 借鉴的附加要素 + 小卡(食材替换)/胃之书(八大菜系食谱)的菜谱推荐，按人群分 */
+const EXTRA = {
+  gym:{ title:"训练日补给到位 ✨",
+    macros:{f:[70,80],c:[280,300],p:[150,160],net:"+200 kcal · 增肌盈余"},
+    recipes:[
+      {n:"番茄牛腩煲",cui:"苏菜",img:"braised beef brisket with tomato stew",fit:"高蛋白 + 复合碳水，补训练消耗",swap:"肥牛换牛腩，脂肪更低、蛋白更足"},
+      {n:"三文鱼牛油果饭",cui:"融合",img:"salmon avocado rice bowl",fit:"补今天缺的 Omega-3",swap:"白米换糙米，碳水更稳"},
+      {n:"鸡胸藜麦沙拉",cui:"轻食",img:"chicken quinoa salad bowl",fit:"蛋白拉满、热量可控",swap:""}]},
+  mom:{ title:"奶量优先，别急着减 ✨",
+    macros:{f:[60,70],c:[200,220],p:[90,100],net:"够 · 含泌乳 +400 kcal"},
+    recipes:[
+      {n:"猪肝菠菜汤",cui:"家常",img:"pork liver and spinach soup chinese",fit:"补铁 + 维C 促吸收，对产后失血",swap:"配橙子/彩椒，铁吸收翻倍"},
+      {n:"紫菜虾仁蛋花汤",cui:"粤菜",img:"seaweed shrimp egg drop soup cantonese",fit:"补碘(哺乳 290µg)+ 优质蛋白",swap:""},
+      {n:"三文鱼时蔬焖饭",cui:"融合",img:"salmon vegetable rice",fit:"DHA 下奶 + 能量管够",swap:"少油快蒸，留住 DHA"}]},
+  old:{ title:"今天蛋白太少了 ⚠️",
+    macros:{f:[30,55],c:[180,220],p:[35,75],net:"-300 kcal · 偏少要补"},
+    recipes:[
+      {n:"嫩豆腐蒸蛋",cui:"粤式",img:"steamed egg with soft tofu cantonese",fit:"软嫩好咀嚼 + 优质蛋白补缺口",swap:"咸菜换蒸蛋，蛋白上来、钠下去"},
+      {n:"清蒸鱼",cui:"淮扬",img:"steamed white fish huaiyang",fit:"低脂高蛋白 + 维D",swap:""},
+      {n:"牛奶燕麦杂粮糊",cui:"家常",img:"oatmeal milk porridge with grains",fit:"补钙 + B12 + 可溶纤维",swap:"加奶补钙、燕麦温和不胀气"}]},
+  veg:{ title:"蛋白不错，盯紧 B12 ✨",
+    macros:{f:[55,65],c:[210,240],p:[70,80],net:"持平"},
+    recipes:[
+      {n:"麻婆豆腐",cui:"川菜",img:"mapo tofu vegetarian sichuan",fit:"植物蛋白 + 铁，豆腐补钙",swap:"配维C蔬菜，非血红素铁吸收翻倍"},
+      {n:"鹰嘴豆咖喱",cui:"印度",img:"chickpea curry indian",fit:"蛋白 + 铁 + 锌 一锅补齐",swap:""},
+      {n:"海苔藜麦碗",cui:"融合",img:"nori quinoa bowl",fit:"藜麦完整蛋白 + 海苔风味",swap:"撒强化营养酵母补 B12"}]},
+  glu:{ title:"碳水和糖叠太满了 ⚠️",
+    macros:{f:[65,55],c:[260,200],p:[60,70],net:"+150 kcal"},
+    recipes:[
+      {n:"杂粮饭 + 清蒸鸡",cui:"家常",img:"multigrain rice with steamed chicken and vegetables",fit:"低GI主食 + 优质蛋白，平稳血糖",swap:"白米换杂粮饭，餐后血糖更平"},
+      {n:"凉拌菠菜豆腐",cui:"家常",img:"spinach tofu salad chinese",fit:"高纤维 + 蛋白，几乎不升糖",swap:""},
+      {n:"无糖豆浆 + 水煮蛋",cui:"早餐",img:"unsweetened soy milk with boiled eggs",fit:"替代含糖早餐",swap:"奶茶换无糖豆浆，少一大波糖"}]},
+  gut:{ title:"今天条条踩雷 ⚠️",
+    macros:{f:[55,45],c:[180,200],p:[40,70],net:"偏少"},
+    recipes:[
+      {n:"山药小米粥",cui:"家常",img:"yam millet porridge chinese",fit:"温和可溶纤维 + 养胃，不产气",swap:"油条换山药粥，去掉高脂诱因"},
+      {n:"清蒸鳕鱼",cui:"粤式",img:"steamed cod fish cantonese",fit:"低脂瘦蛋白 + 温热好消化",swap:""},
+      {n:"南瓜蒸蛋",cui:"家常",img:"steamed pumpkin custard egg",fit:"可溶纤维 + 温和蛋白，低 FODMAP",swap:"麻辣香锅换清蒸，避开辣和油"}]},
+};
+
+const QT = [
+  {t:"受限",c:"#D9803F",bg:"#FBEFE6"},
+  {t:"尚可",c:"#C99A2E",bg:"#FAF4E4"},
+  {t:"良好",c:"#3E9E78",bg:"#EAF6F0"},
+  {t:"优质",c:"#2F8E72",bg:"#E5F3EC"},
+];
+/* 食物图：按菜名英文关键词映射到本地类别图（真实食物照，零运行时依赖、稳定可离线） */
+const IMGMAP = [
+  [/noodle/,"noodles"], [/tofu/,"tofu"], [/salmon|cod|fish/,"fish"], [/chicken/,"chicken"],
+  [/beef|steak|brisket/,"beef"], [/pork|liver/,"pork"], [/shrimp|seaweed|soup/,"soup"],
+  [/oat|millet|congee|yam|porridge/,"porridge"], [/egg|custard|omelette/,"egg"],
+  [/curry/,"curry"], [/chickpea|quinoa|nori|salad/,"salad"], [/nuts|banana|shake|protein/,"snack"],
+  [/coffee|tea|smoothie|water|soy milk/,"drink"], [/rice|multigrain|bun/,"rice"],
+];
+function aimg(p){
+  const s = p.toLowerCase();
+  for(const [re,cat] of IMGMAP){ if(re.test(s)) return `img/${cat}.jpg`; }
+  return "img/rice.jpg";
+}
+function spark(sc){
+  const t=[sc-7,sc-2,sc-5,sc+3,sc-1,sc+2,sc].map(v=>Math.max(35,Math.min(98,v)));
+  const w=72,h=24, mx=Math.max(...t),mn=Math.min(...t),rg=Math.max(1,mx-mn);
+  const pts=t.map((v,i)=>`${(i/(t.length-1)*w).toFixed(1)},${(h-((v-mn)/rg)*(h-5)-2.5).toFixed(1)}`).join(" ");
+  const lx=w, ly=(h-((t[t.length-1]-mn)/rg)*(h-5)-2.5).toFixed(1);
+  return `<svg width="${w}" height="${h}" style="overflow:visible">
+    <polyline points="${pts}" fill="none" stroke="#4FC0A1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${lx}" cy="${ly}" r="2.6" fill="#37A06E"/></svg>`;
+}
 
 let active = 0;
 
@@ -384,8 +517,44 @@ function renderPeople(){
       <div class="pe">${p.emoji}</div><div class="pn">${p.name}</div>
     </div>`).join("");
 }
+function mealCard(m){
+  const q = QT[m.q];
+  return `
+  <div class="mcard">
+    <div class="imgwrap">
+      <div class="ph">${m.ic}</div>
+      <img src="${aimg(m.img)}" loading="lazy" onerror="this.style.display='none'"
+           onload="this.previousElementSibling.style.display='none'">
+    </div>
+    <div class="mc">
+      <div class="mh"><span>${m.ic} ${m.s}</span><span>${m.t}</span></div>
+      <div class="mn">${m.dish}</div>
+      <span class="qtag" style="color:${q.c};background:${q.bg}">${q.t}</span>
+    </div>
+  </div>`;
+}
+function macroBar(lab,arr,col){
+  const pct = Math.min(100, Math.round(arr[0]/arr[1]*100));
+  const over = arr[0] > arr[1];
+  return `<div class="one">
+    <div class="lab"><span>${lab}</span><span><b>${arr[0]}</b>/${arr[1]}g</span></div>
+    <div class="bar"><div class="bf" style="width:${pct}%;background:${over?'#E0894A':col}"></div></div>
+  </div>`;
+}
+function recipeCard(r){
+  return `
+  <div class="rcard">
+    <img class="rimg" src="${aimg(r.img)}" loading="lazy" onerror="this.style.opacity=.25">
+    <div class="rx">
+      <div><span class="rn">${r.n}</span><span class="cui">${r.cui}</span></div>
+      <div class="rf">${r.fit}</div>
+      ${r.swap?`<span class="rs">🔁 ${r.swap}</span>`:""}
+    </div>
+  </div>`;
+}
 function renderBody(){
   const p = PEOPLE[active];
+  const x = EXTRA[p.key];
   const sc = computeScore(p);
   const col = scoreColor(sc);
   document.getElementById("scroll").innerHTML = `
@@ -394,26 +563,34 @@ function renderBody(){
         <div class="rin"><div class="rn" style="color:${col}">${sc}</div><div class="rl">营养分</div></div>
       </div>
       <div class="hx">
-        <div class="ht">今天的营养分 · <b>${p.name}</b> · ${scoreWord(sc)}</div>
+        <div class="ait">${x.title}</div>
         <div class="hd">${p.read}</div>
-        <div class="htag">对照“他自己”的目标算 · 喂入核心分数的「饮食板块」</div>
+        <div class="spark">${spark(sc)}<span class="sl">近 7 天 · ${scoreWord(sc)}</span></div>
       </div>
     </div>
-    <div class="meal">
-      <div class="mt">🍽 今天吃了什么</div>
-      ${p.meals.map(m=>`
-        <div class="slot">
-          <div class="si">${m.ic}</div>
-          <div class="sn">${m.s}</div>
-          <div class="sit">${m.items.map(it=>`<span class="it">${it}</span>`).join("")}</div>
-        </div>`).join("")}
+
+    <div class="mealhd">🍽 今天吃了什么 <span class="mr">${p.meals.length} 餐 · 横滑看全部</span></div>
+    <div class="mealrow">${p.meals.map(mealCard).join("")}</div>
+
+    <div class="macro">
+      <div class="mt"><span>今日宏量 · 净能量</span><span class="net">${x.macros.net}</span></div>
+      <div class="mg">
+        ${macroBar("脂肪",x.macros.f,"#7FA8E0")}
+        ${macroBar("碳水",x.macros.c,"#E3B34D")}
+        ${macroBar("蛋白",x.macros.p,"#E07BA0")}
+      </div>
     </div>
+
     <div class="creed">${p.creed}</div>
     <div class="sechead">★ 这个群体最看重（排在最前）</div>
     ${p.priority.map(rowHTML).join("")}
     <div class="sechead">基础营养 · 按常规标准</div>
     ${p.base.map(rowHTML).join("")}
-    <div class="foot">营养分 = 按下面每条“今日落点 vs 你的区间”加权得出，与因素行同源。<br>绿带 = 适合“他”的健康区间，圆点 = 今天落点。所有区间与加减分基于公开科学，可追溯。<br>这是 wellness 健康管理，不做医疗诊断。</div>`;
+
+    <div class="sechead">🍳 换着吃 · 适合${p.name}的菜谱</div>
+    ${x.recipes.map(recipeCard).join("")}
+
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。</div>`;
   document.getElementById("scroll").scrollTop = 0;
 }
 function select(i){ active=i; renderPeople(); renderBody(); }
