@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>特殊人群 · 食品评分卡片</title>
+<style>
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0; }
+  body{ background:#D9DEE1; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+        display:flex; justify-content:center; align-items:flex-start; min-height:100vh; padding:16px 12px; color:#2A312E; }
+
+  /* ---- 手机外壳：固定高度，内部滚动 ---- */
+  .phone{ width:392px; max-width:100%; height:812px; max-height:94vh; background:#ECEFF1;
+          border-radius:30px; box-shadow:0 18px 50px rgba(40,60,55,.22); overflow:hidden;
+          display:flex; flex-direction:column; }
+
+  .head{ flex:none; padding:14px 16px 0; background:#ECEFF1; }
+  .nav{ display:flex; align-items:center; justify-content:space-between; }
+  .nav .back{ width:36px;height:36px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;
+              font-size:17px;color:#46504A;box-shadow:0 2px 8px rgba(70,120,105,.08); }
+  .nav h1{ font-size:17px; font-weight:600; }
+  .nav .more{ font-size:17px; color:#9AA4A0; letter-spacing:2px; }
+
+  /* 人群切换：六个平分宽度，一行全显示，谁都不切 */
+  .people{ display:flex; gap:5px; padding:12px 0 10px; }
+  .pchip{ flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:4px;
+          padding:8px 2px; border-radius:14px; background:#fff; border:1.5px solid transparent;
+          box-shadow:0 2px 8px rgba(70,120,105,.05); cursor:pointer; transition:.15s; }
+  .pchip .pe{ font-size:20px; line-height:1; }
+  .pchip .pn{ font-size:9.5px; color:#6A746E; font-weight:600; text-align:center; line-height:1.15; }
+  .pchip.on{ border-color:#4FC0A1; background:#F2FBF8; }
+  .pchip.on .pn{ color:#2F8E72; }
+
+  /* 滚动区 */
+  .scrollwrap{ flex:1; position:relative; overflow:hidden; }
+  .scroll{ height:100%; overflow-y:auto; padding:4px 16px 30px; scrollbar-width:thin; }
+  .scroll::-webkit-scrollbar{ width:5px; }
+  .scroll::-webkit-scrollbar-thumb{ background:#C7D0CB; border-radius:3px; }
+  .fade{ position:absolute; left:0; right:0; bottom:0; height:34px; pointer-events:none;
+         background:linear-gradient(transparent,#ECEFF1); }
+
+  /* 今天吃了什么 */
+  .meal{ background:#fff; border-radius:16px; padding:13px 15px; margin:2px 0 6px;
+         box-shadow:0 3px 12px rgba(70,120,105,.05); }
+  .meal .mt{ font-size:11.5px; font-weight:700; color:#9AA4A0; letter-spacing:.5px; margin-bottom:7px; }
+  .meal .mt b{ color:#2F8E72; }
+  .meal .mb{ font-size:12.5px; line-height:1.7; color:#525C55; }
+  .meal .mb .it{ display:inline-block; background:#F3F7F5; border-radius:7px; padding:2px 8px; margin:2px 4px 2px 0; font-size:11.5px; }
+
+  .creed{ font-size:12px; line-height:1.6; color:#7C867F; margin:10px 4px 12px; }
+  .creed b{ color:#2F8E72; font-weight:600; }
+
+  .sechead{ font-size:11.5px; font-weight:700; color:#9AA4A0; letter-spacing:.5px; margin:14px 4px 8px; }
+
+  /* 因素行 */
+  .row{ background:#fff; border-radius:16px; padding:13px 14px; margin-bottom:8px;
+        box-shadow:0 3px 10px rgba(70,120,105,.04); cursor:pointer; transition:.15s; }
+  .row:active{ transform:scale(.99); }
+  .rtop{ display:flex; align-items:center; gap:11px; }
+  .rtop .em{ font-size:19px; width:24px; text-align:center; flex:none; }
+  .col{ flex:1; min-width:0; }
+  .col .nm{ font-size:14.5px; font-weight:600; }
+  .col .td{ font-size:10.5px; color:#9AA4A0; margin-top:2px; }
+  .col .td b{ font-weight:600; }
+
+  /* 区间带 gauge */
+  .gauge{ width:78px; flex:none; }
+  .track{ position:relative; height:6px; background:#EEF2F0; border-radius:4px; margin-top:3px; }
+  .band{ position:absolute; top:0; height:6px; background:#CDEBDD; border-radius:3px; }
+  .mark{ position:absolute; top:50%; width:11px; height:11px; border-radius:50%;
+         transform:translate(-50%,-50%); border:2px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,.25); }
+  .gl{ display:flex; justify-content:space-between; font-size:8.5px; color:#BCC5C0; margin-top:3px; }
+
+  .stat{ flex:none; width:52px; text-align:right; }
+  .stat .sv{ font-size:14px; font-weight:700; }
+  .stat .sl{ font-size:9.5px; margin-top:1px; }
+  .chev{ color:#C7D0CB; font-size:14px; flex:none; transition:.2s; margin-left:2px; }
+  .row.open .chev{ transform:rotate(90deg); }
+
+  .pos{ color:#37A06E; } .neg{ color:#E07B43; } .ok{ color:#37A06E; } .mid{ color:#A0AAA4; }
+  .mk-lo{ background:#E9B25C; } .mk-ok{ background:#37A06E; } .mk-hi{ background:#E07B43; }
+
+  .detail{ max-height:0; overflow:hidden; transition:max-height .25s ease; }
+  .row.open .detail{ max-height:360px; }
+  .dinner{ padding:12px 1px 2px; margin-top:11px; border-top:1px dashed #ECF1EE; }
+  .drow{ display:flex; gap:8px; margin-bottom:8px; font-size:12px; line-height:1.55; }
+  .drow:last-child{ margin-bottom:0; }
+  .dlab{ flex:none; width:52px; font-weight:700; color:#3E8E73; }
+  .dval{ color:#525C55; }
+  .src{ display:inline-flex; align-items:center; gap:4px; background:#F3F7F5; border:1px solid #E3EBE7;
+        border-radius:7px; padding:2px 8px; font-size:10.5px; color:#5C857A; font-weight:600; }
+  .src::before{ content:"📖"; font-size:9px; }
+
+  .foot{ text-align:center; font-size:10.5px; color:#AEB6B1; margin:16px 4px 4px; line-height:1.7; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="head">
+    <div class="nav">
+      <div class="back">‹</div>
+      <h1>今天的食物评分</h1>
+      <div class="more">···</div>
+    </div>
+    <div class="people" id="people"></div>
+  </div>
+
+  <div class="scrollwrap">
+    <div class="scroll" id="scroll"></div>
+    <div class="fade"></div>
+  </div>
+
+</div>
+
+<script>
+/* 评分规则（对齐 v1 文档 U 型双向伤害）：
+   每个营养素都有「健康区间」。今天的摄入落在哪：
+     · 偏左 = 不足 → 这是他重视的就催他补(加分↑)
+     · 落在绿带 = 刚好(✓ 维持)
+     · 偏右 = 过量 → 减分↓
+   band:[lo,hi] 是绿带在轨道上的位置%；mark 是今天摄入落点%。
+   factors 数组按「对这个群体的重要性」从前往后排；priority 段在前，base 段在后。 */
+
+const PEOPLE = [
+{
+  key:"gym", emoji:"💪", name:"健身增肌",
+  meal:["燕麦+乳清蛋白","鸡蛋×2","鸡胸+米饭+西兰花","训练后香蕉+蛋白粉","牛肉+红薯"],
+  creed:"训练量大、要长肌肉。<b>蛋白、复合碳水、优质脂肪的区间整体上移</b>——别人眼里的“多”，对他正好够。",
+  priority:[
+    {em:"🍗",nm:"蛋白质",td:"今日 1.8 g/kg",band:[58,82],mark:74,score:7,lab:"接近目标",
+     how:"按每公斤体重计，未到上限 → 继续加分催他补到目标。",
+     why:"增肌需 1.6–2.2 g/kg/天，是普通人 2 倍以上；亮氨酸触发肌肉合成。今天 1.8 略低于他的目标带。",src:"ISSN / ACSM 立场声明"},
+    {em:"🌾",nm:"复合碳水",td:"今日充足",band:[55,85],mark:70,score:6,lab:"刚好",
+     how:"在补糖原所需区间内 → 加分。",
+     why:"高训练量需碳水 5–7 g/kg 充糖原，不足会掉表现、动用肌肉供能。今天米饭+红薯落在区间。",src:"ACSM 运动营养"},
+    {em:"🥑",nm:"优质脂肪",td:"今日偏少",band:[40,70],mark:32,score:5,lab:"可再加",
+     how:"低于区间下限 → 加分鼓励补。",
+     why:"支撑睾酮等合成激素与热量需求；脂肪过低反而影响恢复。今天偏少。",src:"ISSN / 膳食指南"},
+    {em:"🐟",nm:"Omega-3",td:"今日缺",band:[45,80],mark:18,score:6,lab:"缺口",
+     how:"今天没吃鱼 → 缺口，催补。",
+     why:"降低运动炎症、辅助肌肉合成与关节恢复。今天落点远低于区间。",src:"ISSN / EFSA"},
+    {em:"🔥",nm:"热量",td:"今日略缺",band:[55,80],mark:50,score:5,lab:"可再加",
+     how:"增肌期需热量盈余，今天略低 → 加分。",
+     why:"增肌需要正能量平衡，热量不足会动用肌肉。",src:"ISSN"},
+  ],
+  base:[
+    {em:"🥬",nm:"膳食纤维",td:"今日刚好",band:[40,75],mark:55,score:2,lab:"刚好",how:"区间内 → 维持。",why:"成人 25–38 g/天，今天蔬菜与全谷达标。",src:"膳食指南 / DRI"},
+    {em:"🧂",nm:"钠",td:"今日中等",band:[30,60],mark:48,score:2,lab:"刚好",how:"出汗多需求略高，今天在带内 → 维持。",why:"大量出汗会流失钠，运动人群需求略高于久坐者。",src:"ACSM 补液"},
+    {em:"🧀",nm:"钙",td:"今日刚好",band:[45,75],mark:58,score:2,lab:"刚好",how:"区间内 → 维持。",why:"乳制品与蛋白来源已覆盖，骨骼支撑训练。",src:"IOM DRI"},
+    {em:"🍰",nm:"添加糖",td:"今日偏低",band:[0,30],mark:22,score:1,lab:"刚好",how:"训练后香蕉属合理补糖，未超 → 中性。",why:"除训练后窗口外，添加糖是空热量，挤占营养密度。",src:"WHO"},
+    {em:"🍷",nm:"酒精",td:"今日 0",band:[0,15],mark:2,score:2,lab:"很好",how:"几乎为零 → 加分。",why:"酒精抑制肌肉蛋白合成、扰乱恢复，越少越好。",src:"运动恢复研究"},
+  ]
+},
+{
+  key:"mom", emoji:"🤱", name:"哺乳产后",
+  meal:["小米粥+鸡蛋","瘦牛肉+菠菜+米饭","坚果一把","三文鱼+蔬菜","咖啡×2"],
+  creed:"刚生产、还在泌乳，全身修复期。<b>要“吃够”不是“少吃”</b>——能量、碘、铁都从谷底往上补，绝不和孕前比。",
+  priority:[
+    {em:"🩸",nm:"铁",td:"今日偏少",band:[55,85],mark:42,score:8,lab:"该多补",
+     how:"低于产后区间 → 强催补；建议配维C同餐。",
+     why:"补回分娩失血、防产后贫血。今天牛肉菠菜有铁，但吸收有限、仍低于带。",src:"WHO 贫血指南 / IOM DRI"},
+    {em:"🧂",nm:"碘",td:"今日缺",band:[55,85],mark:30,score:8,lab:"缺口",
+     how:"今天没海产/碘盐少 → 缺口。",
+     why:"哺乳期碘 290µg（全周期最高），关乎乳汁与婴儿神经发育。",src:"IOM DRI"},
+    {em:"🥚",nm:"胆碱",td:"今日略缺",band:[50,80],mark:40,score:6,lab:"可再加",
+     how:"鸡蛋有一点，仍低于带 → 加分。",
+     why:"哺乳期 550mg，进入乳汁支持婴儿大脑发育。",src:"IOM DRI"},
+    {em:"🐟",nm:"Omega-3 · DHA",td:"今日达标",band:[45,80],mark:62,score:4,lab:"刚好✓",
+     how:"三文鱼覆盖 → 落在带内，维持。",
+     why:"DHA 进入乳汁支持婴儿脑与视网膜，母亲储备产后易耗竭。今天达标。",src:"WHO / FAO"},
+    {em:"🔥",nm:"热量",td:"今日略缺",band:[55,82],mark:48,score:6,lab:"要吃够",
+     how:"泌乳额外需 +400 kcal，今天偏低 → 加分催补，严禁节食。",
+     why:"能量不足直接掉奶量与修复速度。这是“要吃够”的核心。",src:"IOM DRI / WHO"},
+  ],
+  base:[
+    {em:"🍗",nm:"蛋白质",td:"今日刚好",band:[50,80],mark:60,score:3,lab:"刚好",how:"区间内 → 维持。",why:"组织修复与泌乳需要充足蛋白。",src:"IOM DRI"},
+    {em:"🧀",nm:"钙",td:"今日略缺",band:[50,80],mark:44,score:4,lab:"可再加",how:"略低 → 加分。",why:"泌乳消耗钙，不足会动用母体骨钙。",src:"IOM DRI"},
+    {em:"☕",nm:"咖啡因",td:"今日 ~200mg",band:[0,55],mark:50,score:1,lab:"留意",how:"接近上限但未超 → 中性，留意别再加。",why:"进入乳汁，建议<300mg/天，过量影响婴儿睡眠。",src:"WHO / AAP"},
+    {em:"💧",nm:"水分",td:"今日偏少",band:[50,85],mark:46,score:3,lab:"可再加",how:"泌乳需水多，今天偏少 → 加分。",why:"泌乳显著增加水分需求。",src:"IOM DRI"},
+    {em:"🍷",nm:"酒精",td:"今日 0",band:[0,10],mark:1,score:2,lab:"很好",how:"为零 → 很好。",why:"进入乳汁影响婴儿，哺乳期建议避免。",src:"AAP / WHO"},
+  ]
+},
+{
+  key:"old", emoji:"👵", name:"老年 65+",
+  meal:["白粥+咸菜","少量米饭+炖菜","面条","全天喝水少"],
+  creed:"以为上年纪要“吃清淡吃少”——但<b>防肌少症蛋白反而要更多</b>，维D、B12 因吸收下降要专门补。尺子和年轻人相反。",
+  priority:[
+    {em:"🍗",nm:"蛋白质",td:"今日严重不足",band:[55,80],mark:26,score:9,lab:"大缺口",
+     how:"今天粥+面几乎没蛋白，远低于带 → 强催补。",
+     why:"抗肌少症需 1.0–1.2 g/kg（高于成人 0.8）；老年合成效率低，反而要比年轻人吃更多。",src:"PROT-AGE / ESPEN 共识"},
+    {em:"☀️",nm:"维生素D",td:"今日缺",band:[50,80],mark:22,score:8,lab:"缺口",
+     how:"没晒太阳/没补 → 缺口。",
+     why:"皮肤合成与肠道吸收随龄下降，800IU 防跌倒骨折。",src:"ESPEN / IOM DRI"},
+    {em:"💊",nm:"维生素B12",td:"今日缺",band:[50,80],mark:28,score:8,lab:"缺口",
+     how:"无强化来源 → 缺口。",
+     why:"胃酸减少致食物 B12 吸收变差，缺乏致贫血与神经损伤。",src:"IOM DRI"},
+    {em:"🧀",nm:"钙",td:"今日缺",band:[55,82],mark:30,score:7,lab:"缺口",
+     how:"今天无乳制品 → 缺口。",
+     why:"骨量流失加速，钙配维D 防骨质疏松。",src:"IOM DRI / NAMS"},
+    {em:"💧",nm:"水分",td:"今日偏少",band:[50,85],mark:34,score:6,lab:"要补水",
+     how:"喝水少 → 加分提醒。",
+     why:"口渴感随龄退化，易脱水却不自觉，增加跌倒与意识混乱风险。",src:"老年营养共识"},
+  ],
+  base:[
+    {em:"🔥",nm:"热量",td:"今日偏少",band:[50,78],mark:40,score:5,lab:"要吃够",how:"食欲差吃太少 → 加分催补。",why:"老年食欲下降易能量不足，加速虚弱。",src:"ESPEN"},
+    {em:"🥬",nm:"膳食纤维 · 可溶",td:"今日偏少",band:[40,75],mark:38,score:4,lab:"可再加",how:"温和渐进加量 → 加分；忌猛增粗纤维。",why:"防便秘，但需可溶、温和、足量饮水。",src:"膳食指南"},
+    {em:"🧂",nm:"钠",td:"今日偏多",band:[20,48],mark:74,score:-6,lab:"偏多",how:"咸菜使今天落在带右侧 → 减分。",why:"老年高血压与肾负担风险高，钠减分比年轻人更重。",src:"AHA / DASH"},
+    {em:"🥓",nm:"腌制/加工",td:"今日偏多",band:[0,30],mark:68,score:-4,lab:"偏多",how:"咸菜属腌制 → 减分。",why:"高盐腌制增加血压与胃黏膜风险。",src:"WHO"},
+    {em:"🍷",nm:"酒精",td:"今日 0",band:[0,12],mark:2,score:2,lab:"很好",how:"为零 → 很好。",why:"与常用药物交互、增加跌倒与认知风险。",src:"老年用药指南"},
+  ]
+},
+{
+  key:"veg", emoji:"🥗", name:"素食",
+  meal:["燕麦+豆浆","豆腐+糙米+西兰花","鹰嘴豆沙拉+坚果"],
+  creed:"蔬果全谷天然占优，真正要盯的是<b>植物饮食容易缺的几样</b>——B12、铁、锌。看的是长期累积缺口，不是一餐定胜负。",
+  priority:[
+    {em:"💊",nm:"维生素B12",td:"今日 0 来源",band:[55,85],mark:14,score:9,lab:"必须补",
+     how:"植物几乎不含、今天无强化 → 缺口最重。",
+     why:"纯素必须强化或补充，长期缺乏致不可逆神经损伤。这是吃“记忆层”的累积账。",src:"AND 素食立场声明"},
+    {em:"🌱",nm:"铁 · 非血红素",td:"今日偏少",band:[55,85],mark:40,score:8,lab:"该多补",
+     how:"豆类有但吸收差，仍低于带 → 催补，配维C。",
+     why:"植物非血红素铁吸收低，素食铁需求约常人 1.8 倍。",src:"IOM DRI / AND"},
+    {em:"🎃",nm:"锌",td:"今日偏少",band:[50,82],mark:38,score:7,lab:"可再加",
+     how:"全谷豆类植酸抑制吸收 → 低于带，加分。",
+     why:"素食锌需求上调约 50%。",src:"IOM DRI"},
+    {em:"🫘",nm:"植物蛋白",td:"今日不错",band:[50,82],mark:64,score:4,lab:"刚好✓",
+     how:"豆腐+鹰嘴豆 → 落在带内，维持。",
+     why:"提供蛋白与互补氨基酸；豆制品兼补铁锌。今天来源多样。",src:"AND 立场声明"},
+    {em:"🥛",nm:"钙 · 纯素",td:"今日接近",band:[50,82],mark:54,score:3,lab:"刚好",
+     how:"强化豆浆+豆腐 → 接近带内，维持。",
+     why:"无乳制品时钙易缺，靠强化植物奶、钙豆腐补足。今天有覆盖。",src:"AND"},
+  ],
+  base:[
+    {em:"🌰",nm:"Omega-3 · ALA",td:"今日偏少",band:[45,80],mark:40,score:5,lab:"可再加",how:"坚果有 ALA，仍低于带 → 加分。",why:"缺鱼源 EPA/DHA，需 ALA 来源并保证总量。",src:"AND / EFSA"},
+    {em:"☀️",nm:"维生素D",td:"今日偏少",band:[50,80],mark:42,score:4,lab:"可再加",how:"低于带 → 加分。",why:"强化食品有限，需关注补充。",src:"AND"},
+    {em:"🥬",nm:"膳食纤维",td:"今日充足",band:[40,80],mark:74,score:2,lab:"刚好",how:"素食优势，带内偏高 → 维持。",why:"纤维充足是素食结构性优势。",src:"膳食指南"},
+    {em:"🍗",nm:"蛋白质 · 总量",td:"今日刚好",band:[50,80],mark:60,score:2,lab:"刚好",how:"区间内 → 维持。",why:"植物蛋白多样组合已达总量。",src:"DRI"},
+    {em:"🌭",nm:"高度加工素肉",td:"今日 0",band:[0,30],mark:5,score:2,lab:"很好",how:"今天没吃 → 中性偏好。",why:"植物仿制品常高钠高添加，过量挤占真食物。",src:"膳食指南"},
+  ]
+},
+{
+  key:"glu", emoji:"🩺", name:"自报控糖",
+  meal:["白馒头+粥","米饭+红烧肉","奶茶一杯","面条"],
+  creed:"用户主动说在控糖，于是<b>和血糖相关的因素权重整体改写</b>——糖与精制碳水重减、纤维与低GI重加。我们只帮她留意，绝不诊断、不命名疾病。",
+  priority:[
+    {em:"🥤",nm:"添加糖",td:"今日偏多",band:[0,18],mark:82,score:-10,lab:"超标",
+     how:"奶茶使今天远超带 → 重减分。",
+     why:"含糖饮料直接抬高血糖负荷，是控糖最该收紧的一项。",src:"ADA 营养共识"},
+    {em:"🍚",nm:"精制碳水",td:"今日过多",band:[15,45],mark:78,score:-8,lab:"偏多",
+     how:"馒头粥米饭面叠加 → 远超带，减分。",
+     why:"高升糖指数使餐后血糖快速飙升，控糖人群权重远重于常人。",src:"ADA"},
+    {em:"🥬",nm:"膳食纤维",td:"今日偏少",band:[50,85],mark:34,score:8,lab:"该多吃",
+     how:"今天蔬菜少 → 低于带，强鼓励补。",
+     why:"延缓糖吸收、平稳餐后血糖、改善胰岛素敏感。",src:"ADA"},
+    {em:"🌾",nm:"低GI主食",td:"今日几乎没有",band:[50,82],mark:20,score:7,lab:"缺口",
+     how:"全是精制主食 → 低GI替代缺口，催补。",
+     why:"低升糖负荷替代白米白面，是控糖最有效的主食杠杆。",src:"ADA"},
+    {em:"🥦",nm:"非淀粉蔬菜",td:"今日偏少",band:[50,85],mark:36,score:6,lab:"该多吃",
+     how:"低于带 → 加分鼓励。",
+     why:"低升糖负荷、高纤维，是控糖可放心多吃的一类。",src:"ADA"},
+  ],
+  base:[
+    {em:"🥓",nm:"饱和脂肪",td:"今日偏多",band:[0,40],mark:66,score:-5,lab:"偏多",how:"红烧肉 → 超带，减分。",why:"过多饱和脂肪影响胰岛素敏感与血脂。",src:"ADA / AHA"},
+    {em:"🍗",nm:"优质蛋白",td:"今日刚好",band:[45,78],mark:58,score:3,lab:"刚好",how:"区间内 → 维持。",why:"提升饱腹、减少碳水占比、平稳血糖。",src:"ADA"},
+    {em:"🥑",nm:"健康脂肪",td:"今日偏少",band:[40,72],mark:40,score:4,lab:"可再加",how:"低于带 → 加分。",why:"与碳水同餐时降低餐后血糖波动。",src:"ADA"},
+    {em:"🧂",nm:"钠",td:"今日中等",band:[25,55],mark:52,score:1,lab:"刚好",how:"接近上沿 → 留意。",why:"控糖常伴血压关注，钠需留意。",src:"ADA / DASH"},
+    {em:"🍷",nm:"酒精",td:"今日 0",band:[0,20],mark:2,score:2,lab:"很好",how:"为零 → 很好。",why:"干扰肝糖输出，可致延迟性低血糖。",src:"ADA"},
+  ]
+},
+{
+  key:"gut", emoji:"🌿", name:"肠胃脆弱",
+  meal:["豆浆+油条","麻辣香锅","稀饭+咸菜"],
+  creed:"敏感不等于“纤维=坏、越少越好”。<b>纤维照样吃够，只是换可溶、温和、慢慢加</b>；真正减分的是产气、高脂、刺激这些诱因。",
+  priority:[
+    {em:"🧅",nm:"高 FODMAP",td:"今日踩雷",band:[0,30],mark:72,score:-7,lab:"偏多",
+     how:"豆浆/蒜等可发酵碳水 → 超带，减分。",
+     why:"可发酵短链碳水在肠道产气，是胀气、腹痛、腹泻的明确诱因。",src:"Monash FODMAP"},
+    {em:"🌶️",nm:"刺激性",td:"今日踩雷",band:[0,25],mark:80,score:-7,lab:"偏多",
+     how:"麻辣 → 远超带，减分。",
+     why:"辣/咖啡因/酒/碳酸直接刺激黏膜、促胃酸，加重反酸不适。",src:"反流 / 功能性消化共识"},
+    {em:"🍟",nm:"脂肪 · 高脂油炸",td:"今日偏多",band:[15,45],mark:74,score:-6,lab:"偏多",
+     how:"油条+香锅 → 超带，减分。",
+     why:"高脂延缓胃排空、松弛食管下括约肌，诱发反流饱胀。",src:"反流膳食证据"},
+    {em:"🥣",nm:"膳食纤维 · 可溶",td:"今日偏少",band:[45,80],mark:36,score:6,lab:"该补·走温和",
+     how:"今天稀饭可溶纤维少 → 低于带，催补，但走燕麦/南瓜、渐进加量。",
+     why:"需求不变（少了便秘也是伤害），只是换形式：可溶优先，猛增不可溶反而减分。",src:"Monash / IBS 共识"},
+    {em:"🍗",nm:"低脂瘦蛋白",td:"今日偏少",band:[45,78],mark:38,score:5,lab:"可再加",
+     how:"今天蛋白少 → 加分，选清蒸水煮等低脂形式。",
+     why:"修复需求不变，但要避开高脂烹饪诱因。",src:"膳食指南"},
+  ],
+  base:[
+    {em:"🍲",nm:"温热熟食",td:"今日一半生冷",band:[55,90],mark:48,score:4,lab:"可再加",how:"咸菜偏生冷 → 低于带，鼓励温热熟食。",why:"温热充分烹熟更易耐受，生冷刺激虚寒型肠胃。",src:"功能性消化共识"},
+    {em:"🥛",nm:"发酵/益生",td:"今日 0",band:[30,70],mark:14,score:4,lab:"可再加",how:"今天没摄入 → 适量加分。",why:"部分子型从益生菌/发酵食品获益，改善菌群。",src:"肠道菌群研究"},
+    {em:"🧂",nm:"钠",td:"今日偏多",band:[25,55],mark:70,score:-4,lab:"偏多",how:"咸菜 → 超带，减分。",why:"高盐刺激胃黏膜、加重不适。",src:"膳食指南"},
+    {em:"⏱️",nm:"进食节奏",td:"今日偏快",band:[40,75],mark:30,score:-3,lab:"偏快",how:"狼吞虎咽 → 落在“过快”侧，减分。",why:"过快过饱增加吞气与胃内压，加重胀气反流。",src:"功能性消化建议"},
+    {em:"💧",nm:"水分",td:"今日刚好",band:[45,82],mark:60,score:2,lab:"刚好",how:"带内 → 维持。",why:"配合可溶纤维，足量饮水防便秘。",src:"膳食指南"},
+  ]
+},
+];
+
+let active = 0;
+
+function markClass(mark, band){
+  if(mark < band[0]-2) return "mk-lo";
+  if(mark > band[1]+2) return "mk-hi";
+  return "mk-ok";
+}
+function rowHTML(f){
+  const sign = f.score>0?"+":"";
+  const sc = f.score>0?"pos":f.score<0?"neg":"mid";
+  const mk = markClass(f.mark, f.band);
+  return `
+  <div class="row" onclick="toggle(this)">
+    <div class="rtop">
+      <div class="em">${f.em}</div>
+      <div class="col">
+        <div class="nm">${f.nm}</div>
+        <div class="td">${f.td}</div>
+      </div>
+      <div class="gauge">
+        <div class="track">
+          <div class="band" style="left:${f.band[0]}%;width:${f.band[1]-f.band[0]}%"></div>
+          <div class="mark ${mk}" style="left:${f.mark}%"></div>
+        </div>
+        <div class="gl"><span>不足</span><span>刚好</span><span>过量</span></div>
+      </div>
+      <div class="stat">
+        <div class="sv ${sc}">${sign}${f.score}</div>
+        <div class="sl ${sc}">${f.lab}</div>
+      </div>
+      <div class="chev">›</div>
+    </div>
+    <div class="detail"><div class="dinner">
+      <div class="drow"><div class="dlab">怎么评</div><div class="dval">${f.how}</div></div>
+      <div class="drow"><div class="dlab">为什么</div><div class="dval">${f.why}</div></div>
+      <div class="drow"><div class="dlab">出处</div><div class="dval"><span class="src">${f.src}</span></div></div>
+    </div></div>
+  </div>`;
+}
+
+function renderPeople(){
+  document.getElementById("people").innerHTML = PEOPLE.map((p,i)=>`
+    <div class="pchip ${i===active?'on':''}" onclick="select(${i})">
+      <div class="pe">${p.emoji}</div><div class="pn">${p.name}</div>
+    </div>`).join("");
+}
+function renderBody(){
+  const p = PEOPLE[active];
+  document.getElementById("scroll").innerHTML = `
+    <div class="meal">
+      <div class="mt">🍽 今天吃了什么 · <b>${p.name}</b></div>
+      <div class="mb">${p.meal.map(m=>`<span class="it">${m}</span>`).join("")}</div>
+    </div>
+    <div class="creed">${p.creed}</div>
+    <div class="sechead">★ 这个群体最看重（排在最前）</div>
+    ${p.priority.map(rowHTML).join("")}
+    <div class="sechead">基础营养 · 按常规标准</div>
+    ${p.base.map(rowHTML).join("")}
+    <div class="foot">绿带 = 适合“他”的健康区间，圆点 = 今天落点。<br>所有区间与加减分都基于公开、全球公认的科学，可追溯。<br>这是 wellness 健康管理，不做医疗诊断。</div>`;
+  document.getElementById("scroll").scrollTop = 0;
+}
+function select(i){ active=i; renderPeople(); renderBody(); }
+function toggle(el){ el.classList.toggle("open"); }
+
+renderPeople(); renderBody();
+</script>
+</body>
+</html>
