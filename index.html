@@ -70,13 +70,14 @@
   .spark .sl{ font-size:9.5px; color:#A8B2AC; }
 
   /* 今日餐食 · AIGC 图卡（横滑） */
-  .mealhd{ font-size:13px; font-weight:700; color:#46504A; margin:6px 4px 8px; padding-right:42px;
-           display:flex; align-items:center; justify-content:space-between; cursor:pointer; }
+  .mealhd{ font-size:13px; font-weight:700; color:#46504A; margin:6px 4px 8px;
+           display:flex; align-items:center; justify-content:space-between; }
   .mealhd .mr{ font-size:10.5px; color:#A8B2AC; font-weight:500; }
-  .mealhd .mchev{ flex:none; font-size:12px; font-weight:700; color:#2F8E72; background:#E7F5EE;
-                  border:1px solid #D5EADF; border-radius:10px; padding:6px 13px; margin-left:8px; }
-  .mealhd .mchev:active{ background:#DCEFE6; }
-  .mealrow.collapsed{ display:none; }
+  /* 菜谱「展开另外N道」按钮 */
+  .reciperow.collapsed{ display:none; }
+  .foldmore{ text-align:center; font-size:12px; font-weight:700; color:#2F8E72; background:#EAF6F0;
+             border:1px solid #D7EBE2; border-radius:12px; padding:9px; margin:2px 0 8px; cursor:pointer; }
+  .foldmore:active{ background:#DCEFE6; }
   .mealrow{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:1px 0 8px; }
   .mcard{ background:#fff; border-radius:15px; overflow:hidden;
           box-shadow:0 3px 12px rgba(70,120,105,.07); }
@@ -533,14 +534,16 @@ function saveOrder(){
   BLOCK_ORDER = [...cont.querySelectorAll(".block")].map(b=>b.dataset.key);
   try{ localStorage.setItem(ORDER_KEY, JSON.stringify(BLOCK_ORDER)); }catch(e){}
 }
-/* 「今天吃了什么」折叠（默认收起，状态记住） */
-let mealCollapsed = (localStorage.getItem("everly_meal_collapsed") ?? "1") === "1";
-function toggleMeal(h){
-  mealCollapsed = !mealCollapsed;
-  try{ localStorage.setItem("everly_meal_collapsed", mealCollapsed ? "1" : "0"); }catch(e){}
-  const blk = h.closest(".block");
-  blk.querySelector(".mealrow").classList.toggle("collapsed", mealCollapsed);
-  h.querySelector(".mchev").textContent = mealCollapsed ? "▸ 展开" : "▾ 收起";
+/* 菜谱：留 1 道常显，其余折叠（默认收起，状态记住） */
+let recipeCollapsed = (localStorage.getItem("everly_recipe_collapsed") ?? "1") === "1";
+function toggleRecipes(btn){
+  recipeCollapsed = !recipeCollapsed;
+  try{ localStorage.setItem("everly_recipe_collapsed", recipeCollapsed ? "1" : "0"); }catch(e){}
+  const blk = btn.closest(".block");
+  const row = blk.querySelector(".reciperow");
+  row.classList.toggle("collapsed", recipeCollapsed);
+  const rest = row.querySelectorAll(".rcard").length;
+  btn.textContent = recipeCollapsed ? `▾ 展开另外 ${rest} 道` : "▴ 收起";
 }
 function attachDrag(){
   const cont = document.getElementById("blocks"); if(!cont) return;
@@ -677,8 +680,8 @@ function renderBody(){
   const col = scoreColor(sc);
   // 各板块内容（可拖拽排序）
   const B = {
-    meal: `<div class="mealhd" onclick="toggleMeal(this)"><span>🍽 今天吃了什么 <span class="mr">共 ${p.meals.length} 餐</span></span><span class="mchev">${mealCollapsed?"▸ 展开":"▾ 收起"}</span></div>
-           <div class="mealrow ${mealCollapsed?"collapsed":""}">${p.meals.map(mealCard).join("")}</div>`,
+    meal: `<div class="mealhd">🍽 今天吃了什么 <span class="mr">共 ${p.meals.length} 餐</span></div>
+           <div class="mealrow">${p.meals.map(mealCard).join("")}</div>`,
     macro: `<div class="macro">
         <div class="mt"><span>今日宏量 · 净能量</span><span class="net">${x.macros.net}</span></div>
         <div class="mg">
@@ -691,7 +694,9 @@ function renderBody(){
         <div class="sechead">基础营养 · 按常规标准</div>
         ${p.base.map(rowHTML).join("")}`,
     recipes: `<div class="sechead">🍳 换着吃 · 适合${p.name}的菜谱</div>
-        ${x.recipes.map(recipeCard).join("")}`,
+        ${recipeCard(x.recipes[0])}
+        <div class="reciperow ${recipeCollapsed?"collapsed":""}">${x.recipes.slice(1).map(recipeCard).join("")}</div>
+        ${x.recipes.length>1 ? `<div class="foldmore" onclick="toggleRecipes(this)">${recipeCollapsed?`▾ 展开另外 ${x.recipes.length-1} 道`:"▴ 收起"}</div>` : ""}`,
   };
   if(x.deep) B.deep = deepHTML(x.deep);
   const order = [...BLOCK_ORDER.filter(k=>B[k]), ...Object.keys(B).filter(k=>!BLOCK_ORDER.includes(k))];
@@ -713,7 +718,7 @@ function renderBody(){
     <div class="draghint">⠿ 按住卡片右上角手柄可拖动排序（顺序会记住）</div>
     <div id="blocks">${blocks}</div>
 
-    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-11 18:34:30</span></div>`;
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-11 18:37:58</span></div>`;
   attachDrag();
   document.getElementById("scroll").scrollTop = 0;
 }
