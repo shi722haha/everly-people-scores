@@ -75,6 +75,7 @@
   .mealhd .mr{ font-size:10.5px; color:#A8B2AC; font-weight:500; }
   /* 菜谱「展开另外N道」按钮 */
   .reciperow.collapsed{ display:none; }
+  .deepbody.collapsed{ display:none; }
   .foldmore{ text-align:center; font-size:12px; font-weight:700; color:#2F8E72; background:#EAF6F0;
              border:1px solid #D7EBE2; border-radius:12px; padding:9px; margin:2px 0 8px; cursor:pointer; }
   .foldmore:active{ background:#DCEFE6; }
@@ -534,6 +535,15 @@ function saveOrder(){
   BLOCK_ORDER = [...cont.querySelectorAll(".block")].map(b=>b.dataset.key);
   try{ localStorage.setItem(ORDER_KEY, JSON.stringify(BLOCK_ORDER)); }catch(e){}
 }
+/* AI 洞察：总结句常显，下面分析默认折叠 */
+let deepCollapsed = (localStorage.getItem("everly_deep_collapsed") ?? "1") === "1";
+function toggleDeep(btn){
+  deepCollapsed = !deepCollapsed;
+  try{ localStorage.setItem("everly_deep_collapsed", deepCollapsed ? "1" : "0"); }catch(e){}
+  btn.closest(".deep").querySelector(".deepbody").classList.toggle("collapsed", deepCollapsed);
+  btn.textContent = deepCollapsed ? "▾ 展开分析" : "▴ 收起分析";
+}
+
 /* 菜谱：留 1 道常显，其余折叠（默认收起，状态记住） */
 let recipeCollapsed = (localStorage.getItem("everly_recipe_collapsed") ?? "1") === "1";
 function toggleRecipes(btn){
@@ -658,20 +668,23 @@ function deepHTML(d){
   const head = `<div class="ai-eyebrow">✨ AI 洞察 · 基于你的数据生成</div>
     <div class="dt">${d.title}</div>
     ${d.lead ? `<div class="ai-lead">${d.lead}</div>` : ""}`;
+  let body;
   if(d.tiers){
     const col={red:["#D9803F","#FBEFE6"],amber:["#C99A2E","#FAF4E4"],green:["#2F8E72","#E5F3EC"]};
-    return `<div class="deep insight">${head}
-      ${d.tiers.map(t=>{const c=col[t.color];return `
+    body = `${d.tiers.map(t=>{const c=col[t.color];return `
         <div class="tier"><div class="th"><span class="dot" style="background:${c[0]}"></span>${t.k}<span class="sub">${t.sub}</span></div>
           <div class="chips">${t.items.map(i=>`<span class="c" style="color:${c[0]};background:${c[1]}">${i}</span>`).join("")}</div>
         </div>`;}).join("")}
-      <div class="dnote">${d.note}</div></div>`;
+      <div class="dnote">${d.note}</div>`;
+  } else {
+    body = `<div class="ldg">${d.ledger.map(l=>`<div class="row2"><span class="lk">${l.k}</span><span class="lv">${l.v}</span></div>`).join("")}</div>
+      <div class="th2">非食物维度 · 影响你今天要补多少</div>
+      <div class="chips">${d.factors.map(f=>`<span class="c" style="color:#7C6FB0;background:#F1EFF9">${f}</span>`).join("")}</div>
+      <div class="dnote">${d.note}</div>`;
   }
   return `<div class="deep insight">${head}
-    <div class="ldg">${d.ledger.map(l=>`<div class="row2"><span class="lk">${l.k}</span><span class="lv">${l.v}</span></div>`).join("")}</div>
-    <div class="th2">非食物维度 · 影响你今天要补多少</div>
-    <div class="chips">${d.factors.map(f=>`<span class="c" style="color:#7C6FB0;background:#F1EFF9">${f}</span>`).join("")}</div>
-    <div class="dnote">${d.note}</div></div>`;
+    <div class="deepbody ${deepCollapsed?"collapsed":""}">${body}</div>
+    <div class="foldmore" onclick="toggleDeep(this)">${deepCollapsed?"▾ 展开分析":"▴ 收起分析"}</div></div>`;
 }
 function renderBody(){
   const p = PEOPLE[active];
@@ -718,7 +731,7 @@ function renderBody(){
     <div class="draghint">⠿ 按住卡片右上角手柄可拖动排序（顺序会记住）</div>
     <div id="blocks">${blocks}</div>
 
-    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-11 18:37:58</span></div>`;
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-11 18:43:02</span></div>`;
   attachDrag();
   document.getElementById("scroll").scrollTop = 0;
 }
