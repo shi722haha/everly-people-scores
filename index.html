@@ -39,13 +39,30 @@
   .fade{ position:absolute; left:0; right:0; bottom:0; height:34px; pointer-events:none;
          background:linear-gradient(transparent,#ECEFF1); }
 
-  /* 今天吃了什么 */
-  .meal{ background:#fff; border-radius:16px; padding:13px 15px; margin:2px 0 6px;
+  /* 总营养分 hero */
+  .hero{ display:flex; gap:14px; align-items:center; background:#fff; border-radius:18px;
+         padding:15px; margin:2px 0 10px; box-shadow:0 3px 12px rgba(70,120,105,.06); }
+  .ring{ width:74px; height:74px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center; }
+  .ring .rin{ width:58px; height:58px; border-radius:50%; background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .ring .rn{ font-size:23px; font-weight:700; line-height:1; }
+  .ring .rl{ font-size:9px; color:#9AA4A0; margin-top:2px; }
+  .hx{ flex:1; min-width:0; }
+  .hx .ht{ font-size:11.5px; font-weight:700; color:#46504A; }
+  .hx .ht b{ color:#2F8E72; }
+  .hx .hd{ font-size:12.5px; line-height:1.5; color:#525C55; margin:5px 0 7px; }
+  .hx .htag{ font-size:9.5px; color:#9DA8A2; background:#F3F7F5; border-radius:6px; padding:3px 7px; display:inline-block; }
+
+  /* 今天吃了什么 · 分餐 */
+  .meal{ background:#fff; border-radius:16px; padding:11px 15px; margin:0 0 6px;
          box-shadow:0 3px 12px rgba(70,120,105,.05); }
-  .meal .mt{ font-size:11.5px; font-weight:700; color:#9AA4A0; letter-spacing:.5px; margin-bottom:7px; }
+  .meal .mt{ font-size:11.5px; font-weight:700; color:#9AA4A0; letter-spacing:.5px; margin-bottom:4px; }
   .meal .mt b{ color:#2F8E72; }
-  .meal .mb{ font-size:12.5px; line-height:1.7; color:#525C55; }
-  .meal .mb .it{ display:inline-block; background:#F3F7F5; border-radius:7px; padding:2px 8px; margin:2px 4px 2px 0; font-size:11.5px; }
+  .slot{ display:flex; align-items:center; gap:9px; padding:7px 0; border-bottom:1px solid #F4F7F5; }
+  .slot:last-child{ border-bottom:none; padding-bottom:1px; }
+  .slot .si{ font-size:15px; width:20px; text-align:center; flex:none; }
+  .slot .sn{ font-size:11px; color:#9AA4A0; font-weight:600; width:30px; flex:none; }
+  .slot .sit{ display:flex; flex-wrap:wrap; gap:5px; }
+  .slot .it{ background:#F3F7F5; border-radius:7px; padding:2px 9px; font-size:11.5px; color:#525C55; }
 
   .creed{ font-size:12px; line-height:1.6; color:#7C867F; margin:10px 4px 12px; }
   .creed b{ color:#2F8E72; font-weight:600; }
@@ -125,7 +142,8 @@
 const PEOPLE = [
 {
   key:"gym", emoji:"💪", name:"健身增肌",
-  meal:["燕麦+乳清蛋白","鸡蛋×2","鸡胸+米饭+西兰花","训练后香蕉+蛋白粉","牛肉+红薯"],
+  meals:[{s:"早餐",ic:"🌅",items:["燕麦+乳清蛋白","鸡蛋×2"]},{s:"午餐",ic:"☀️",items:["鸡胸","米饭","西兰花"]},{s:"练后",ic:"🍌",items:["香蕉","蛋白粉"]},{s:"晚餐",ic:"🌙",items:["牛肉","红薯"]}],
+  read:"蛋白、碳水、脂肪都踩在目标带上，今天吃得很对路。",
   creed:"训练量大、要长肌肉。<b>蛋白、复合碳水、优质脂肪的区间整体上移</b>——别人眼里的“多”，对他正好够。",
   priority:[
     {em:"🍗",nm:"蛋白质",td:"今日 1.8 g/kg",band:[58,82],mark:74,score:7,lab:"接近目标",
@@ -154,7 +172,8 @@ const PEOPLE = [
 },
 {
   key:"mom", emoji:"🤱", name:"哺乳产后",
-  meal:["小米粥+鸡蛋","瘦牛肉+菠菜+米饭","坚果一把","三文鱼+蔬菜","咖啡×2"],
+  meals:[{s:"早餐",ic:"🌅",items:["小米粥","鸡蛋"]},{s:"午餐",ic:"☀️",items:["瘦牛肉","菠菜","米饭"]},{s:"加餐",ic:"🥜",items:["坚果一把"]},{s:"晚餐",ic:"🌙",items:["三文鱼","蔬菜"]},{s:"饮品",ic:"☕",items:["咖啡×2"]}],
+  read:"DHA 够了，但铁、碘、热量还没补到位——别急着减。",
   creed:"刚生产、还在泌乳，全身修复期。<b>要“吃够”不是“少吃”</b>——能量、碘、铁都从谷底往上补，绝不和孕前比。",
   priority:[
     {em:"🩸",nm:"铁",td:"今日偏少",band:[55,85],mark:42,score:8,lab:"该多补",
@@ -183,7 +202,8 @@ const PEOPLE = [
 },
 {
   key:"old", emoji:"👵", name:"老年 65+",
-  meal:["白粥+咸菜","少量米饭+炖菜","面条","全天喝水少"],
+  meals:[{s:"早餐",ic:"🌅",items:["白粥","咸菜"]},{s:"午餐",ic:"☀️",items:["少量米饭","炖菜"]},{s:"晚餐",ic:"🌙",items:["面条"]},{s:"全天",ic:"💧",items:["喝水少"]}],
+  read:"蛋白严重不足、钠偏高——今天对长肌肉和血压都不利。",
   creed:"以为上年纪要“吃清淡吃少”——但<b>防肌少症蛋白反而要更多</b>，维D、B12 因吸收下降要专门补。尺子和年轻人相反。",
   priority:[
     {em:"🍗",nm:"蛋白质",td:"今日严重不足",band:[55,80],mark:26,score:9,lab:"大缺口",
@@ -212,7 +232,8 @@ const PEOPLE = [
 },
 {
   key:"veg", emoji:"🥗", name:"素食",
-  meal:["燕麦+豆浆","豆腐+糙米+西兰花","鹰嘴豆沙拉+坚果"],
+  meals:[{s:"早餐",ic:"🌅",items:["燕麦","豆浆"]},{s:"午餐",ic:"☀️",items:["豆腐","糙米","西兰花"]},{s:"晚餐",ic:"🌙",items:["鹰嘴豆沙拉","坚果"]}],
+  read:"蛋白和钙不错，但 B12、铁、锌这几样长期缺口还得补。",
   creed:"蔬果全谷天然占优，真正要盯的是<b>植物饮食容易缺的几样</b>——B12、铁、锌。看的是长期累积缺口，不是一餐定胜负。",
   priority:[
     {em:"💊",nm:"维生素B12",td:"今日 0 来源",band:[55,85],mark:14,score:9,lab:"必须补",
@@ -241,7 +262,8 @@ const PEOPLE = [
 },
 {
   key:"glu", emoji:"🩺", name:"自报控糖",
-  meal:["白馒头+粥","米饭+红烧肉","奶茶一杯","面条"],
+  meals:[{s:"早餐",ic:"🌅",items:["白馒头","粥"]},{s:"午餐",ic:"☀️",items:["米饭","红烧肉"]},{s:"加餐",ic:"🧋",items:["奶茶一杯"]},{s:"晚餐",ic:"🌙",items:["面条"]}],
+  read:"精制碳水和糖叠太满，纤维和蔬菜太少——今天血糖不友好。",
   creed:"用户主动说在控糖，于是<b>和血糖相关的因素权重整体改写</b>——糖与精制碳水重减、纤维与低GI重加。我们只帮她留意，绝不诊断、不命名疾病。",
   priority:[
     {em:"🥤",nm:"添加糖",td:"今日偏多",band:[0,18],mark:82,score:-10,lab:"超标",
@@ -270,7 +292,8 @@ const PEOPLE = [
 },
 {
   key:"gut", emoji:"🌿", name:"肠胃脆弱",
-  meal:["豆浆+油条","麻辣香锅","稀饭+咸菜"],
+  meals:[{s:"早餐",ic:"🌅",items:["豆浆","油条"]},{s:"午餐",ic:"☀️",items:["麻辣香锅"]},{s:"晚餐",ic:"🌙",items:["稀饭","咸菜"]}],
+  read:"高FODMAP、辣、油炸全踩了——今天对肠胃几乎条条是雷。",
   creed:"敏感不等于“纤维=坏、越少越好”。<b>纤维照样吃够，只是换可溶、温和、慢慢加</b>；真正减分的是产气、高脂、刺激这些诱因。",
   priority:[
     {em:"🧅",nm:"高 FODMAP",td:"今日踩雷",band:[0,30],mark:72,score:-7,lab:"偏多",
@@ -306,6 +329,22 @@ function markClass(mark, band){
   if(mark > band[1]+2) return "mk-hi";
   return "mk-ok";
 }
+/* 总营养分：按每条「今日落点 vs 区间」的贴合度，用重要度(|分|)加权平均 → 0–100。
+   与下面的因素行同源，不是另给的数。 */
+function computeScore(p){
+  let sw=0, sf=0;
+  [...p.priority, ...p.base].forEach(f=>{
+    let fit;
+    if(f.mark < f.band[0]) fit = Math.max(0, 100 - (f.band[0]-f.mark)*1.6);
+    else if(f.mark > f.band[1]) fit = Math.max(0, 100 - (f.mark-f.band[1])*1.6);
+    else fit = 100;
+    const w = Math.abs(f.score) + 1;
+    sw += w; sf += fit*w;
+  });
+  return Math.round(sf/sw);
+}
+function scoreColor(s){ return s>=78 ? "#4FC0A1" : s>=64 ? "#E3B34D" : "#E0894A"; }
+function scoreWord(s){ return s>=78 ? "状态不错" : s>=64 ? "可以更好" : "今天需留意"; }
 function rowHTML(f){
   const sign = f.score>0?"+":"";
   const sc = f.score>0?"pos":f.score<0?"neg":"mid";
@@ -347,17 +386,34 @@ function renderPeople(){
 }
 function renderBody(){
   const p = PEOPLE[active];
+  const sc = computeScore(p);
+  const col = scoreColor(sc);
   document.getElementById("scroll").innerHTML = `
+    <div class="hero">
+      <div class="ring" style="background:conic-gradient(${col} 0 ${sc}%, #EAF1EE ${sc}% 100%)">
+        <div class="rin"><div class="rn" style="color:${col}">${sc}</div><div class="rl">营养分</div></div>
+      </div>
+      <div class="hx">
+        <div class="ht">今天的营养分 · <b>${p.name}</b> · ${scoreWord(sc)}</div>
+        <div class="hd">${p.read}</div>
+        <div class="htag">对照“他自己”的目标算 · 喂入核心分数的「饮食板块」</div>
+      </div>
+    </div>
     <div class="meal">
-      <div class="mt">🍽 今天吃了什么 · <b>${p.name}</b></div>
-      <div class="mb">${p.meal.map(m=>`<span class="it">${m}</span>`).join("")}</div>
+      <div class="mt">🍽 今天吃了什么</div>
+      ${p.meals.map(m=>`
+        <div class="slot">
+          <div class="si">${m.ic}</div>
+          <div class="sn">${m.s}</div>
+          <div class="sit">${m.items.map(it=>`<span class="it">${it}</span>`).join("")}</div>
+        </div>`).join("")}
     </div>
     <div class="creed">${p.creed}</div>
     <div class="sechead">★ 这个群体最看重（排在最前）</div>
     ${p.priority.map(rowHTML).join("")}
     <div class="sechead">基础营养 · 按常规标准</div>
     ${p.base.map(rowHTML).join("")}
-    <div class="foot">绿带 = 适合“他”的健康区间，圆点 = 今天落点。<br>所有区间与加减分都基于公开、全球公认的科学，可追溯。<br>这是 wellness 健康管理，不做医疗诊断。</div>`;
+    <div class="foot">营养分 = 按下面每条“今日落点 vs 你的区间”加权得出，与因素行同源。<br>绿带 = 适合“他”的健康区间，圆点 = 今天落点。所有区间与加减分基于公开科学，可追溯。<br>这是 wellness 健康管理，不做医疗诊断。</div>`;
   document.getElementById("scroll").scrollTop = 0;
 }
 function select(i){ active=i; renderPeople(); renderBody(); }
