@@ -598,7 +598,7 @@ function renderBody(){
     <div class="sechead">🍳 换着吃 · 适合${p.name}的菜谱</div>
     ${x.recipes.map(recipeCard).join("")}
 
-    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。</div>`;
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-11 17:03:44</span></div>`;
   document.getElementById("scroll").scrollTop = 0;
 }
 function select(i){ active=i; renderPeople(); renderBody(); }
