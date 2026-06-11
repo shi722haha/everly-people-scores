@@ -70,8 +70,10 @@
   .spark .sl{ font-size:9.5px; color:#A8B2AC; }
 
   /* 今日餐食 · AIGC 图卡（横滑） */
-  .mealhd{ font-size:13px; font-weight:700; color:#46504A; margin:6px 4px 8px; display:flex; align-items:center; justify-content:space-between; }
+  .mealhd{ font-size:13px; font-weight:700; color:#46504A; margin:6px 4px 8px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; }
   .mealhd .mr{ font-size:10.5px; color:#A8B2AC; font-weight:500; }
+  .mealhd .mchev{ color:#A8B2AC; font-size:12px; margin-left:6px; }
+  .mealrow.collapsed{ display:none; }
   .mealrow{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:1px 0 8px; }
   .mcard{ background:#fff; border-radius:15px; overflow:hidden;
           box-shadow:0 3px 12px rgba(70,120,105,.07); }
@@ -528,6 +530,15 @@ function saveOrder(){
   BLOCK_ORDER = [...cont.querySelectorAll(".block")].map(b=>b.dataset.key);
   try{ localStorage.setItem(ORDER_KEY, JSON.stringify(BLOCK_ORDER)); }catch(e){}
 }
+/* 「今天吃了什么」折叠（默认收起，状态记住） */
+let mealCollapsed = (localStorage.getItem("everly_meal_collapsed") ?? "1") === "1";
+function toggleMeal(h){
+  mealCollapsed = !mealCollapsed;
+  try{ localStorage.setItem("everly_meal_collapsed", mealCollapsed ? "1" : "0"); }catch(e){}
+  const blk = h.closest(".block");
+  blk.querySelector(".mealrow").classList.toggle("collapsed", mealCollapsed);
+  h.querySelector(".mchev").textContent = mealCollapsed ? "▸ 展开" : "▾ 收起";
+}
 function attachDrag(){
   const cont = document.getElementById("blocks"); if(!cont) return;
   cont.querySelectorAll(".block").forEach(bl=>{
@@ -663,8 +674,8 @@ function renderBody(){
   const col = scoreColor(sc);
   // 各板块内容（可拖拽排序）
   const B = {
-    meal: `<div class="mealhd">🍽 今天吃了什么 <span class="mr">共 ${p.meals.length} 餐</span></div>
-           <div class="mealrow">${p.meals.map(mealCard).join("")}</div>`,
+    meal: `<div class="mealhd" onclick="toggleMeal(this)"><span>🍽 今天吃了什么 <span class="mr">共 ${p.meals.length} 餐</span></span><span class="mchev">${mealCollapsed?"▸ 展开":"▾ 收起"}</span></div>
+           <div class="mealrow ${mealCollapsed?"collapsed":""}">${p.meals.map(mealCard).join("")}</div>`,
     macro: `<div class="macro">
         <div class="mt"><span>今日宏量 · 净能量</span><span class="net">${x.macros.net}</span></div>
         <div class="mg">
@@ -699,7 +710,7 @@ function renderBody(){
     <div class="draghint">⠿ 按住卡片右上角手柄可拖动排序（顺序会记住）</div>
     <div id="blocks">${blocks}</div>
 
-    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-11 18:03:09</span></div>`;
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-11 18:32:07</span></div>`;
   attachDrag();
   document.getElementById("scroll").scrollTop = 0;
 }
