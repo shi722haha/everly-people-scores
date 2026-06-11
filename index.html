@@ -107,6 +107,22 @@
   .creed{ font-size:12px; line-height:1.6; color:#7C867F; margin:10px 4px 12px; }
   .creed b{ color:#2F8E72; font-weight:600; }
 
+  /* 深度块：肠胃影响因素 / 产后身体账本（这两类做更厚） */
+  .deep{ background:#fff; border-radius:16px; padding:13px 15px; margin:0 0 10px;
+         box-shadow:0 3px 12px rgba(70,120,105,.06); border:1px solid #E6F0EB; }
+  .deep .dt{ font-size:12.5px; font-weight:700; color:#2F8E72; margin-bottom:11px; }
+  .tier{ margin-bottom:10px; }
+  .tier .th{ font-size:11px; font-weight:700; color:#46504A; margin-bottom:5px; display:flex; align-items:center; gap:6px; }
+  .tier .dot{ width:8px; height:8px; border-radius:50%; flex:none; }
+  .tier .sub{ font-weight:500; color:#AEB6B1; font-size:9.5px; }
+  .chips{ display:flex; flex-wrap:wrap; gap:5px; }
+  .chips .c{ font-size:11px; padding:3px 9px; border-radius:8px; }
+  .ldg .row2{ display:flex; gap:9px; margin-bottom:8px; font-size:12px; line-height:1.5; }
+  .ldg .lk{ flex:none; width:42px; font-weight:700; color:#2F8E72; }
+  .ldg .lv{ color:#525C55; } .ldg .lv b{ color:#2E3A35; font-weight:700; }
+  .th2{ font-size:10.5px; font-weight:700; color:#46504A; margin:10px 0 6px; }
+  .dnote{ font-size:10.5px; color:#9AA4A0; line-height:1.55; margin-top:9px; padding-top:9px; border-top:1px dashed #ECF1EE; }
+
   .sechead{ font-size:11.5px; font-weight:700; color:#9AA4A0; letter-spacing:.5px; margin:14px 4px 8px; }
 
   /* 因素行 */
@@ -398,6 +414,14 @@ const EXTRA = {
       {n:"鸡胸藜麦沙拉",cui:"轻食",img:"chicken quinoa salad bowl",fit:"蛋白拉满、热量可控",swap:""}]},
   mom:{ title:"奶量优先，别急着减 ✨",
     macros:{f:[60,70],c:[200,220],p:[90,100],net:"够 · 含泌乳 +400 kcal"},
+    deep:{ title:"📒 母亲的身体账本 · 为你，不为奶量",
+      ledger:[
+        {k:"进账",v:"今天吃进的能量 + 蛋白 / 铁 / 碘 / DHA"},
+        {k:"出账",v:"基础代谢 + 活动 + <b>哺乳消耗 ≈ +400 kcal</b>（透支你身体的账）"},
+        {k:"结余",v:"有缺口 → <b>默认先补够</b>，地板＝你的恢复·铁·精力，不被掏空"},
+        {k:"怎么补",v:"今天该补 铁 / 碘 / 热量 → 见下方「换着吃」"}],
+      factors:["碎片化睡眠","频繁夜醒","情绪起伏"],
+      note:"瘦身只 opt-in、不施压、不催“瘦回去”。从产后谷底往上，不和孕前比。" },
     recipes:[
       {n:"猪肝菠菜汤",cui:"家常",img:"pork liver and spinach soup chinese",fit:"补铁 + 维C 促吸收，对产后失血",swap:"配橙子/彩椒，铁吸收翻倍"},
       {n:"紫菜虾仁蛋花汤",cui:"粤菜",img:"seaweed shrimp egg drop soup cantonese",fit:"补碘(哺乳 290µg)+ 优质蛋白",swap:""},
@@ -422,6 +446,12 @@ const EXTRA = {
       {n:"无糖豆浆 + 水煮蛋",cui:"早餐",img:"unsweetened soy milk with boiled eggs",fit:"替代含糖早餐",swap:"奶茶换无糖豆浆，少一大波糖"}]},
   gut:{ title:"今天条条踩雷 ⚠️",
     macros:{f:[55,45],c:[180,200],p:[40,70],net:"偏少"},
+    deep:{ title:"🔬 影响你肠胃的因素（不只是食物）",
+      tiers:[
+        {k:"确认诱因",sub:"已多信号交叉验证",color:"red",items:["空腹喝咖啡","出差·作息打乱","高脂·油炸","高FODMAP(豆/蒜)","辛辣刺激"]},
+        {k:"观察中",sub:"证据攒够才升为确认",color:"amber",items:["睡眠不足","压力大","睡前进食","两餐间隔太长","吃太快"]},
+        {k:"可安心",sub:"温和好消化",color:"green",items:["白粥","蒸蛋","清蒸鱼","山药小米粥","南瓜"]}],
+      note:"非食物诱因（作息 / 压力 / 睡眠）和食物一起进分。来自四层记忆 + 多信号交叉验证，绝不单信号下结论；真改善了，尺子随你上移。" },
     recipes:[
       {n:"山药小米粥",cui:"家常",img:"yam millet porridge chinese",fit:"温和可溶纤维 + 养胃，不产气",swap:"油条换山药粥，去掉高脂诱因"},
       {n:"清蒸鳕鱼",cui:"粤式",img:"steamed cod fish cantonese",fit:"低脂瘦蛋白 + 温热好消化",swap:""},
@@ -561,6 +591,22 @@ function recipeCard(r){
     </div>
   </div>`;
 }
+function deepHTML(d){
+  if(d.tiers){
+    const col={red:["#D9803F","#FBEFE6"],amber:["#C99A2E","#FAF4E4"],green:["#2F8E72","#E5F3EC"]};
+    return `<div class="deep"><div class="dt">${d.title}</div>
+      ${d.tiers.map(t=>{const c=col[t.color];return `
+        <div class="tier"><div class="th"><span class="dot" style="background:${c[0]}"></span>${t.k}<span class="sub">${t.sub}</span></div>
+          <div class="chips">${t.items.map(i=>`<span class="c" style="color:${c[0]};background:${c[1]}">${i}</span>`).join("")}</div>
+        </div>`;}).join("")}
+      <div class="dnote">${d.note}</div></div>`;
+  }
+  return `<div class="deep"><div class="dt">${d.title}</div>
+    <div class="ldg">${d.ledger.map(l=>`<div class="row2"><span class="lk">${l.k}</span><span class="lv">${l.v}</span></div>`).join("")}</div>
+    <div class="th2">非食物维度 · 影响你今天要补多少</div>
+    <div class="chips">${d.factors.map(f=>`<span class="c" style="color:#7C6FB0;background:#F1EFF9">${f}</span>`).join("")}</div>
+    <div class="dnote">${d.note}</div></div>`;
+}
 function renderBody(){
   const p = PEOPLE[active];
   const x = EXTRA[p.key];
@@ -591,6 +637,7 @@ function renderBody(){
     </div>
 
     <div class="creed">${p.creed}</div>
+    ${x.deep ? deepHTML(x.deep) : ""}
     <div class="sechead">★ 这个群体最看重（排在最前）</div>
     ${p.priority.map(rowHTML).join("")}
     <div class="sechead">基础营养 · 按常规标准</div>
@@ -599,7 +646,7 @@ function renderBody(){
     <div class="sechead">🍳 换着吃 · 适合${p.name}的菜谱</div>
     ${x.recipes.map(recipeCard).join("")}
 
-    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-11 17:10:23</span></div>`;
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-11 17:29:00</span></div>`;
   document.getElementById("scroll").scrollTop = 0;
 }
 function select(i){ active=i; renderPeople(); renderBody(); }
