@@ -96,13 +96,13 @@
   .fcard .ffn{ font-size:16px; font-weight:800; color:#2E3A35; }
   .fcard .fmeal{ font-size:10px; color:#A8B2AC; font-weight:700; background:#F3F7F5; border-radius:6px; padding:2px 7px; flex:none; }
   .fcard .fw{ font-size:13px; color:#525C55; margin-top:7px; line-height:1.55; }
-  .corrbtn{ margin-top:10px; font-size:11.5px; font-weight:700; color:#7C867F; background:#F4F6F5; border:1px solid #E6EBE9; border-radius:9px; padding:7px 12px; cursor:pointer; }
-  .corrbtn:active{ background:#EAEFEC; }
-  .fcard.corrected{ opacity:.55; }
-  .fcard.corrected .fw{ text-decoration:line-through; }
-  .corrnote{ display:none; font-size:11.5px; color:#2F8E72; font-weight:700; margin-top:8px; }
-  .fcard.corrected .corrnote{ display:block; }
-  .fcard.corrected .corrbtn{ display:none; }
+  .cprompt{ font-size:11.5px; color:#8A938D; font-weight:600; margin-top:10px; }
+  .choice{ display:flex; gap:8px; margin-top:7px; }
+  .cbtn{ flex:1; font-size:12.5px; font-weight:700; color:#6A746E; background:#F6F8F7;
+         border:1.5px solid #E6EBE9; border-radius:10px; padding:9px; cursor:pointer; }
+  .cbtn.ok.sel{ background:#E7F4EC; border-color:#9FD3B6; color:#2F8E72; }
+  .cbtn.bad.sel{ background:#FBEFE6; border-color:#EEC4A4; color:#D9803F; }
+  .corrnote{ display:none; font-size:11.5px; color:#2F8E72; font-weight:700; margin-top:9px; }
   .mealrow{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:1px 0 8px; }
   .mcard{ background:#fff; border-radius:15px; overflow:hidden;
           box-shadow:0 3px 12px rgba(70,120,105,.07); }
@@ -546,7 +546,18 @@ function spark(sc){
    这是「生成 mini app 时用户可选的参数」：少数据(小白) vs 数据详版(bio hacker)，不是写死界面。*/
 let MODE = localStorage.getItem("everly_mode_solo") || "simple";   /* 默认小白简版 */
 function setMode(m){ MODE=m; try{ localStorage.setItem("everly_mode_solo", m); }catch(e){} renderBody(); }
-function correctItem(btn){ btn.closest(".fcard").classList.toggle("corrected"); }
+function chooseFeel(btn){
+  const card = btn.closest(".fcard");
+  card.querySelectorAll(".cbtn").forEach(b=>b.classList.remove("sel"));
+  btn.classList.add("sel");
+  const note = card.querySelector(".corrnote");
+  if(note){
+    note.style.display = "block";
+    note.textContent = btn.dataset.v === "ok"
+      ? "✅ 记下了——你吃这个还行，以后少提醒你"
+      : "✅ 记下了——会帮你盯紧这个";
+  }
+}
 
 /* 肠胃今天这顿的「别吃 / 能吃」——食物非常具体，每条带归因(为啥+追到哪顿) */
 const SIMPLE_GUT = {
@@ -575,30 +586,35 @@ function renderSimple(p, x){
       <div class="vsum">${s.summary}</div>
     </div>
 
-    <div class="simhead no">🚫 今天先别吃</div>
+    <div class="mealhd">🍽 今天吃了什么 <span class="mr">共 ${p.meals.length} 餐 · 已帮你记下</span></div>
+    <div class="mealrow">${p.meals.map(mealCard).join("")}</div>
+
+    <div class="simhead no">🚫 今天这几样别再吃了</div>
     ${s.avoid.map(a=>`
       <div class="fcard">
         <div class="ff"><span class="ffn">${a.f}</span><span class="fmeal">${a.meal}</span></div>
         <div class="fw">${a.why}</div>
-        <button class="corrbtn" onclick="correctItem(this)">👍 我吃这个其实没事</button>
-        <div class="corrnote">✅ 记下了——以后这个不再提醒你</div>
+        <div class="cprompt">你今天吃了，感觉怎么样？（你说了算，不是我定死）</div>
+        <div class="choice">
+          <button class="cbtn ok" data-v="ok" onclick="chooseFeel(this)">😊 我吃的还行</button>
+          <button class="cbtn bad" data-v="bad" onclick="chooseFeel(this)">😣 确实不舒服</button>
+        </div>
+        <div class="corrnote"></div>
       </div>`).join("")}
 
-    <div class="simhead ok">✅ 今天可以放心吃</div>
+    <div class="simhead ok">✅ 换着吃这些（今天吃着最舒服）</div>
     ${s.safe.map(a=>`
       <div class="fcard">
         <div class="ff"><span class="ffn">${a.f}</span></div>
         <div class="fw">${a.why}</div>
-        <button class="corrbtn" onclick="correctItem(this)">👎 我吃这个不舒服</button>
-        <div class="corrnote">✅ 记下了——以后会帮你留意这个</div>
       </div>`).join("")}
 
-    <div class="simhead ok">🍳 想换着吃，试试这些</div>
+    <div class="simhead ok">🍳 想换个花样，试试这几道</div>
     ${recipeCard(rec[0])}
     <div class="reciperow ${recipeCollapsed?"collapsed":""}">${rec.slice(1).map(recipeCard).join("")}</div>
     ${rec.length>1 ? `<div class="foldmore" onclick="toggleRecipes(this)">${recipeCollapsed?`▾ 再看 ${rec.length-1} 道`:"▴ 收起"}</div>` : ""}
 
-    <div class="foot">这是「小白简版」：零指标、直接告诉你吃啥别吃啥，全部追到今天具体哪顿。<br>红的不准？点「我吃这个没事」就能纠正，越用越懂你。<br>想看分数和数据 → 切到上面「📊 数据详版」。wellness 健康管理，不做医疗诊断。</div>`;
+    <div class="foot">「小白简版」：整体感受 + 今天吃了什么照样记着；只把高油/高盐/高脂那些数据，换成“这个别吃、那个推荐”。<br>吃没吃舒服你自己选，不是我定死——越选越懂你。想看分数和数据 → 切「📊 数据详版」。wellness 健康管理，不做医疗诊断。</div>`;
 }
 
 let active = 0;
@@ -823,7 +839,7 @@ function renderBody(){
     <div class="draghint">按住卡片可拖动排序（顺序会记住）</div>
     <div id="blocks">${blocks}</div>
 
-    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-12 11:21:19</span></div>`;
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-12 11:29:54</span></div>`;
   attachDrag();
   document.getElementById("scroll").scrollTop = 0;
 }
