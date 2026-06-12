@@ -144,6 +144,7 @@
   .gprog b{ color:#B5762E; }
   .gchip{ font-size:11.5px; color:#B5762E; background:#FBF1E3; border:1px solid #EFD9BC; border-radius:8px; padding:5px 10px; cursor:pointer; }
   .goalmore.collapsed{ display:none; }
+  .discmore.collapsed{ display:none; }
   .gtoggle{ font-size:11.5px; font-weight:700; color:#B5762E; margin-top:10px; cursor:pointer; }
   .mealrow{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:1px 0 8px; }
   .mcard{ background:#fff; border-radius:15px; overflow:hidden;
@@ -673,11 +674,19 @@ function discoveryCard(){
   return `<div class="deep">
     <div class="ai-eyebrow" style="background:#EAF1F8;color:#5C7FB0">🔍 帮你找雷</div>
     <div class="dt" style="color:#46504A">还不知道自己哪样不能吃？正常，我帮你试出来。</div>
-    <div class="ai-lead">你不一定清楚自己对啥敏感。下面这几样我先盯着——你吃完告诉我舒不舒服，几次就能帮你认准它到底是不是雷。</div>
-    <div class="th2">正在帮你观察的（还没下结论）</div>
-    <div class="chips">${["豆制品","辛辣","乳制品","生冷","咖啡"].map(chip).join("")}</div>
-    <button class="minibtn" onclick="this.textContent='✅ 好，记一笔，我帮你盯着'">＋ 我怀疑还有别的，告诉你</button>
+    <div class="discmore collapsed">
+      <div class="ai-lead">你不一定清楚自己对啥敏感。下面这几样我先盯着——你吃完告诉我舒不舒服，几次就能帮你认准它到底是不是雷。</div>
+      <div class="th2">正在帮你观察的（还没下结论）</div>
+      <div class="chips">${["豆制品","辛辣","乳制品","生冷","咖啡"].map(chip).join("")}</div>
+      <button class="minibtn" onclick="this.textContent='✅ 好，记一笔，我帮你盯着'">＋ 我怀疑还有别的，告诉你</button>
+    </div>
+    <div class="gtoggle" style="color:#5C7FB0" onclick="toggleDisc(this)">展开看看 ▾</div>
   </div>`;
+}
+function toggleDisc(btn){
+  const more = btn.parentElement.querySelector(".discmore");
+  more.classList.toggle("collapsed");
+  btn.textContent = more.classList.contains("collapsed") ? "展开看看 ▾" : "收起 ▴";
 }
 
 /* ③ 宏量 + 按年龄的独立分析 */
@@ -999,7 +1008,7 @@ function renderBody(){
     <div class="draghint">按住卡片可拖动排序（顺序会记住）</div>
     <div id="blocks">${blocks}</div>
 
-    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-12 14:32:33</span></div>`;
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-12 14:41:02</span></div>`;
   attachDrag();
   document.getElementById("scroll").scrollTop = 0;
 }
