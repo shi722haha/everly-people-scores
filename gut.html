@@ -116,6 +116,33 @@
   .actchip.pos{ color:#fff; background:#3E9E78; }
   .actchip.ok{ color:#6A746E; background:#EEF2F0; }
   .actsub{ font-size:12.5px; color:#525C55; line-height:1.5; margin-top:6px; }
+
+  /* 意图识别卡 */
+  .intent{ background:linear-gradient(180deg,#F2FBF7,#fff 55%); border:1px solid #D5EADF; border-radius:16px; padding:14px 15px; margin-bottom:12px; box-shadow:0 3px 12px rgba(70,120,105,.06); }
+  .intent .idt{ font-size:13.5px; font-weight:700; color:#2E3A35; margin:8px 0 11px; line-height:1.55; }
+  .ibtns{ display:flex; gap:9px; }
+  .ibtn{ flex:1; font-size:12.5px; font-weight:700; border-radius:10px; padding:11px; cursor:pointer; border:1.5px solid transparent; }
+  .ibtn.yes{ background:#2F8E72; color:#fff; }
+  .ibtn.no{ background:#F2F5F4; color:#6A746E; border-color:#E6EBE9; }
+  .iplan{ display:none; }
+  .iplanhd{ font-size:12.5px; font-weight:700; color:#2F8E72; margin-bottom:9px; }
+  .goal{ font-size:13px; color:#46504A; line-height:1.55; background:#F4F8F6; border-radius:10px; padding:9px 12px; margin-bottom:7px; }
+  .goal b{ color:#2F8E72; }
+  /* 年龄分析 */
+  .agelines{ font-size:12.5px; color:#46504A; line-height:1.65; }
+  .agelines > div{ margin-bottom:5px; }
+  .agelines b{ color:#2E3A35; }
+  /* 小按钮 */
+  .minibtn{ margin-top:11px; font-size:11.5px; font-weight:700; color:#7C867F; background:#F4F6F5; border:1px solid #E6EBE9; border-radius:9px; padding:8px 12px; cursor:pointer; }
+  .minibtn:active{ background:#EAEFEC; }
+  /* 目标 / 冲刺卡 */
+  .goalcard{ background:linear-gradient(180deg,#FDF6EE,#fff 55%); border:1px solid #F0DEC8; border-radius:16px; padding:14px 15px; margin-bottom:12px; box-shadow:0 3px 12px rgba(120,90,40,.06); }
+  .gmain{ font-size:15px; font-weight:800; color:#B5762E; margin:9px 0 10px; }
+  .gbar{ height:9px; background:#F0E6D8; border-radius:5px; overflow:hidden; }
+  .gfill{ height:9px; background:linear-gradient(90deg,#E8B66A,#D99A3C); border-radius:5px; }
+  .gprog{ font-size:12px; color:#8A7A60; margin-top:8px; font-weight:600; }
+  .gprog b{ color:#B5762E; }
+  .gchip{ font-size:11.5px; color:#B5762E; background:#FBF1E3; border:1px solid #EFD9BC; border-radius:8px; padding:5px 10px; cursor:pointer; }
   .mealrow{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:1px 0 8px; }
   .mcard{ background:#fff; border-radius:15px; overflow:hidden;
           box-shadow:0 3px 12px rgba(70,120,105,.07); }
@@ -624,6 +651,88 @@ function simpleRow(f){
   </div></div></div>`;
 }
 
+/* 这个 demo 用户：40 岁（沿用肠胃飞轮的虚拟用户：40岁·常出差·消化弱）*/
+const AGE = {
+  age:40,
+  pro:"过了 40，肌肉每年都在悄悄掉，蛋白更要吃够——今天差得有点多，加份鸡蛋或鱼。",
+  carb:"活动量一般，主食别超量，白米白面这种精制的少来点。",
+  fat:"40 后要护血管，今天油和肥肉的脂肪偏多了，省一点。",
+  note:"同样这三样，年龄不同需求不同：年轻人能多吃点碳水，上了年纪要多补蛋白、控脂肪。这里按你 40 岁这条线给你算。",
+};
+
+/* ① 意图识别 → 识别到“想改”就主动给方案 */
+function intentCard(){
+  return `<div class="intent">
+    <div class="ai-eyebrow">👀 意图识别</div>
+    <div class="idt">最近你常来看这页、还认真记了餐——是不是想把肠胃调好了？</div>
+    <div class="ibtns">
+      <button class="ibtn yes" onclick="showPlan(this)">想，直接给我方案</button>
+      <button class="ibtn no" onclick="hideIntent(this)">先不用</button>
+    </div>
+    <div class="iplan">
+      <div class="iplanhd">那这周就这 3 件，照着来 👇</div>
+      <div class="goal"><b>① 早餐</b> 油条换成山药小米粥</div>
+      <div class="goal"><b>② 午餐</b> 这周先别点麻辣香锅</div>
+      <div class="goal"><b>③ 每天</b> 加一份发酵的（酸奶 / 纳豆）</div>
+    </div>
+  </div>`;
+}
+function showPlan(b){ const c=b.closest(".intent"); c.querySelector(".ibtns").style.display="none"; c.querySelector(".iplan").style.display="block"; }
+function hideIntent(b){ const c=b.closest(".intent"); c.querySelector(".ibtns").style.display="none"; c.querySelector(".idt").textContent="好，需要的时候随时叫我，我再给你方案。"; }
+
+/* ② 帮你找雷 —— 给“不知道自己啥不能吃”的人 */
+function discoveryCard(){
+  const chip = t => `<span class="c" style="color:#5C7FB0;background:#EAF1F8">${t}</span>`;
+  return `<div class="deep">
+    <div class="ai-eyebrow" style="background:#EAF1F8;color:#5C7FB0">🔍 帮你找雷</div>
+    <div class="dt" style="color:#46504A">还不知道自己哪样不能吃？正常，我帮你试出来。</div>
+    <div class="ai-lead">你不一定清楚自己对啥敏感。下面这几样我先盯着——你吃完告诉我舒不舒服，几次就能帮你认准它到底是不是雷。</div>
+    <div class="th2">正在帮你观察的（还没下结论）</div>
+    <div class="chips">${["豆制品","辛辣","乳制品","生冷","咖啡"].map(chip).join("")}</div>
+    <button class="minibtn" onclick="this.textContent='✅ 好，记一笔，我帮你盯着'">＋ 我怀疑还有别的，告诉你</button>
+  </div>`;
+}
+
+/* ③ 宏量 + 按年龄的独立分析 */
+function macroAgeCard(x){
+  const m=x.macros;
+  return `<div class="deep">
+    <div class="dt" style="color:#46504A">🍙 今天的油 / 碳水 / 蛋白</div>
+    <div class="mg" style="margin-top:10px">
+      ${macroBar("脂肪",m.f,"#7FA8E0")}
+      ${macroBar("碳水",m.c,"#E3B34D")}
+      ${macroBar("蛋白",m.p,"#E07BA0")}
+    </div>
+    <div class="th2">👤 按你这个年龄（${AGE.age} 岁）该怎么吃</div>
+    <div class="agelines">
+      <div>🥩 <b>蛋白</b>：${AGE.pro}</div>
+      <div>🍚 <b>碳水</b>：${AGE.carb}</div>
+      <div>🫒 <b>脂肪</b>：${AGE.fat}</div>
+    </div>
+    <div class="dnote">${AGE.note}</div>
+  </div>`;
+}
+
+/* ④ 目标 / 冲刺空间 */
+let goalDone = 3;
+function goalCard(){
+  const pct = Math.round(goalDone/7*100);
+  return `<div class="goalcard">
+    <div class="ai-eyebrow" style="background:#FBF1E3;color:#B5762E">🎯 给自己定个小目标</div>
+    <div class="gmain" id="gmain">这一周，肠胃一次都不闹</div>
+    <div class="gbar"><div class="gfill" style="width:${pct}%"></div></div>
+    <div class="gprog">已经稳了 <b>${goalDone}</b> / 7 天 · 还差 ${7-goalDone} 天就达成 💪</div>
+    <div class="th2">换个目标冲？</div>
+    <div class="chips">
+      <span class="gchip" onclick="setGoal(this)">把今天缺的纤维、发酵补上</span>
+      <span class="gchip" onclick="setGoal(this)">这周戒掉空腹咖啡</span>
+      <span class="gchip" onclick="setGoal(this)">少吃一顿外卖</span>
+    </div>
+    <button class="minibtn" onclick="this.textContent='✅ 已添加，去冲！'">＋ 自己写一个目标</button>
+  </div>`;
+}
+function setGoal(el){ const m=document.getElementById("gmain"); if(m) m.textContent=el.textContent; }
+
 function renderSimple(p, x){
   const s = SIMPLE_GUT;
   const rec = x.recipes;
@@ -632,6 +741,8 @@ function renderSimple(p, x){
       <div class="vbig">${s.verdict}</div>
       <div class="vsum">${s.summary}</div>
     </div>
+
+    ${goalCard()}
 
     <div class="mealhd">🍽 今天吃了什么 <span class="mr">共 ${p.meals.length} 餐 · 已帮你记下</span></div>
     <div class="mealrow">${p.meals.map(mealCard).join("")}</div>
@@ -652,9 +763,15 @@ function renderSimple(p, x){
         <div class="corrnote"></div>
       </div>`).join("")}
 
+    ${discoveryCard()}
+
     <div class="simhead ok">🥗 今天该少吃 / 该补的，给你说清楚</div>
     ${p.priority.map(simpleRow).join("")}
     ${p.base.map(simpleRow).join("")}
+
+    ${macroAgeCard(x)}
+
+    ${intentCard()}
 
     <div class="simhead ok">🍳 想吃舒服点，换这几道</div>
     ${recipeCard(rec[0])}
@@ -888,7 +1005,7 @@ function renderBody(){
     <div class="draghint">按住卡片可拖动排序（顺序会记住）</div>
     <div id="blocks">${blocks}</div>
 
-    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-12 13:48:48</span></div>`;
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-12 14:09:57</span></div>`;
   attachDrag();
   document.getElementById("scroll").scrollTop = 0;
 }
