@@ -186,6 +186,7 @@
                color:#3E9E78; letter-spacing:.3px; background:#E7F5EE; border-radius:7px; padding:3px 9px; }
   .ai-lead{ font-size:12px; line-height:1.6; color:#46504A; background:#fff; border:1px solid #E4F0EA;
             border-radius:11px; padding:10px 12px; margin:9px 0 12px; box-shadow:0 1px 6px rgba(70,120,105,.05); }
+  .ai-mini{ font-size:11px; line-height:1.55; color:#8A938D; margin:-4px 2px 11px; }
   .deep .dt{ font-size:12.5px; font-weight:700; color:#2F8E72; margin:9px 0 4px; }
   .tier{ margin-bottom:10px; }
   .tier .th{ font-size:11px; font-weight:700; color:#46504A; margin-bottom:5px; display:flex; align-items:center; gap:6px; }
@@ -535,6 +536,7 @@ const EXTRA = {
     macros:{f:[55,45],c:[180,200],p:[40,70],net:"偏少"},
     deep:{ title:"🔬 影响你肠胃的因素（不只是食物）",
       lead:"你这几天在出差、作息被打乱，肠胃比平时更脆弱。今天的雷主要来自空腹咖啡和那顿麻辣香锅——不全是食物本身，压力和睡眠也在拖后腿。",
+      intent:"👀 顺带一提：你最近连运动、睡眠的建议都愿意试、还坚持记录——看得出你是想改的人，所以方案我给得更主动些。",
       tiers:[
         {k:"确认诱因",sub:"已多信号交叉验证",color:"red",items:["空腹喝咖啡","出差·作息打乱","油炸·太油","豆浆/洋葱/蒜·爱胀气","辛辣刺激"]},
         {k:"观察中",sub:"证据攒够才升为确认",color:"amber",items:["睡眠不足","压力大","睡前进食","两餐间隔太长","吃太快"]},
@@ -660,25 +662,8 @@ const AGE = {
   note:"同样这三样，年龄不同需求不同：年轻人能多吃点碳水，上了年纪要多补蛋白、控脂肪。这里按你 40 岁这条线给你算。",
 };
 
-/* ① 意图识别 → 识别到“想改”就主动给方案 */
-function intentCard(){
-  return `<div class="intent">
-    <div class="ai-eyebrow">👀 意图识别</div>
-    <div class="idt">最近你常来看这页、还认真记了餐——是不是想把肠胃调好了？</div>
-    <div class="ibtns">
-      <button class="ibtn yes" onclick="showPlan(this)">想，直接给我方案</button>
-      <button class="ibtn no" onclick="hideIntent(this)">先不用</button>
-    </div>
-    <div class="iplan">
-      <div class="iplanhd">那这周就这 3 件，照着来 👇</div>
-      <div class="goal"><b>① 早餐</b> 油条换成山药小米粥</div>
-      <div class="goal"><b>② 午餐</b> 这周先别点麻辣香锅</div>
-      <div class="goal"><b>③ 每天</b> 加一份发酵的（酸奶 / 纳豆）</div>
-    </div>
-  </div>`;
-}
-function showPlan(b){ const c=b.closest(".intent"); c.querySelector(".ibtns").style.display="none"; c.querySelector(".iplan").style.display="block"; }
-function hideIntent(b){ const c=b.closest(".intent"); c.querySelector(".ibtns").style.display="none"; c.querySelector(".idt").textContent="好，需要的时候随时叫我，我再给你方案。"; }
+/* 意图识别：不单独做卡片——它贯穿全 app（愿不愿采纳运动/睡眠建议、坚不坚持记录），
+   只在 AI 洞察里轻轻提一句（见 EXTRA.gut.deep.intent）。*/
 
 /* ② 帮你找雷 —— 给“不知道自己啥不能吃”的人 */
 function discoveryCard(){
@@ -770,8 +755,6 @@ function renderSimple(p, x){
     <div class="simhead ok">🥗 今天该少吃 / 该补的，给你说清楚</div>
     ${p.priority.map(simpleRow).join("")}
     ${p.base.map(simpleRow).join("")}
-
-    ${intentCard()}
 
     <div class="simhead ok">🍳 想吃舒服点，换这几道</div>
     ${recipeCard(rec[0])}
@@ -932,7 +915,8 @@ function recipeCard(r){
 function deepHTML(d){
   const head = `<div class="ai-eyebrow">✨ AI 洞察 · 基于你的数据生成</div>
     <div class="dt">${d.title}</div>
-    ${d.lead ? `<div class="ai-lead">${d.lead}</div>` : ""}`;
+    ${d.lead ? `<div class="ai-lead">${d.lead}</div>` : ""}
+    ${d.intent ? `<div class="ai-mini">${d.intent}</div>` : ""}`;
   let body;
   if(d.tiers){
     const col={red:["#D9803F","#FBEFE6"],amber:["#C99A2E","#FAF4E4"],green:["#2F8E72","#E5F3EC"]};
@@ -1005,7 +989,7 @@ function renderBody(){
     <div class="draghint">按住卡片可拖动排序（顺序会记住）</div>
     <div id="blocks">${blocks}</div>
 
-    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-12 14:13:26</span></div>`;
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-12 14:19:46</span></div>`;
   attachDrag();
   document.getElementById("scroll").scrollTop = 0;
 }
