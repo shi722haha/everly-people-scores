@@ -143,6 +143,8 @@
   .gprog{ font-size:12px; color:#8A7A60; margin-top:8px; font-weight:600; }
   .gprog b{ color:#B5762E; }
   .gchip{ font-size:11.5px; color:#B5762E; background:#FBF1E3; border:1px solid #EFD9BC; border-radius:8px; padding:5px 10px; cursor:pointer; }
+  .goalmore.collapsed{ display:none; }
+  .gtoggle{ font-size:11.5px; font-weight:700; color:#B5762E; margin-top:10px; cursor:pointer; }
   .mealrow{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:1px 0 8px; }
   .mcard{ background:#fff; border-radius:15px; overflow:hidden;
           box-shadow:0 3px 12px rgba(70,120,105,.07); }
@@ -707,16 +709,24 @@ function goalCard(){
     <div class="gmain" id="gmain">这一周，肠胃一次都不闹</div>
     <div class="gbar"><div class="gfill" style="width:${pct}%"></div></div>
     <div class="gprog">已经稳了 <b>${goalDone}</b> / 7 天 · 还差 ${7-goalDone} 天就达成 💪</div>
-    <div class="th2">换个目标冲？</div>
-    <div class="chips">
-      <span class="gchip" onclick="setGoal(this)">把今天缺的纤维、发酵补上</span>
-      <span class="gchip" onclick="setGoal(this)">这周戒掉空腹咖啡</span>
-      <span class="gchip" onclick="setGoal(this)">少吃一顿外卖</span>
+    <div class="goalmore collapsed">
+      <div class="th2">换个目标冲？</div>
+      <div class="chips">
+        <span class="gchip" onclick="setGoal(this)">把今天缺的纤维、发酵补上</span>
+        <span class="gchip" onclick="setGoal(this)">这周戒掉空腹咖啡</span>
+        <span class="gchip" onclick="setGoal(this)">少吃一顿外卖</span>
+      </div>
+      <button class="minibtn" onclick="this.textContent='✅ 已添加，去冲！'">＋ 自己写一个目标</button>
     </div>
-    <button class="minibtn" onclick="this.textContent='✅ 已添加，去冲！'">＋ 自己写一个目标</button>
+    <div class="gtoggle" onclick="toggleGoal(this)">换个目标 / 自己写 ▾</div>
   </div>`;
 }
 function setGoal(el){ const m=document.getElementById("gmain"); if(m) m.textContent=el.textContent; }
+function toggleGoal(btn){
+  const more = btn.parentElement.querySelector(".goalmore");
+  more.classList.toggle("collapsed");
+  btn.textContent = more.classList.contains("collapsed") ? "换个目标 / 自己写 ▾" : "收起 ▴";
+}
 
 function renderSimple(p, x){
   const s = SIMPLE_GUT;
@@ -989,7 +999,7 @@ function renderBody(){
     <div class="draghint">按住卡片可拖动排序（顺序会记住）</div>
     <div id="blocks">${blocks}</div>
 
-    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-12 14:26:01</span></div>`;
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-12 14:32:33</span></div>`;
   attachDrag();
   document.getElementById("scroll").scrollTop = 0;
 }
