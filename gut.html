@@ -682,7 +682,7 @@ function discoveryCard(){
 function macroAgeCard(x){
   const m=x.macros;
   return `<div class="deep">
-    <div class="dt" style="color:#46504A">🍙 今天的油 / 碳水 / 蛋白</div>
+    <div class="dt" style="color:#46504A">🍙 今天的脂肪 / 碳水 / 蛋白</div>
     <div class="mg" style="margin-top:10px">
       ${macroBar("脂肪",m.f,"#7FA8E0")}
       ${macroBar("碳水",m.c,"#E3B34D")}
@@ -989,7 +989,7 @@ function renderBody(){
     <div class="draghint">按住卡片可拖动排序（顺序会记住）</div>
     <div id="blocks">${blocks}</div>
 
-    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-12 14:22:13</span></div>`;
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-12 14:26:01</span></div>`;
   attachDrag();
   document.getElementById("scroll").scrollTop = 0;
 }
