@@ -79,6 +79,30 @@
   .foldmore{ text-align:center; font-size:12px; font-weight:700; color:#2F8E72; background:#EAF6F0;
              border:1px solid #D7EBE2; border-radius:12px; padding:9px; margin:2px 0 8px; cursor:pointer; }
   .foldmore:active{ background:#DCEFE6; }
+
+  /* ===== 小白简版（零指标，按画像分层的表层）===== */
+  .modebar{ background:#fff; border-radius:14px; padding:7px; margin:2px 0 12px; box-shadow:0 3px 12px rgba(70,120,105,.06); }
+  .modebar .mrow{ display:flex; gap:7px; }
+  .mbtn{ flex:1; border:none; background:#F2F5F4; color:#6A746E; font-size:12.5px; font-weight:700; padding:10px; border-radius:10px; cursor:pointer; }
+  .mbtn.on{ background:#2F8E72; color:#fff; }
+  .mhint{ font-size:9.5px; color:#AEB6B1; text-align:center; margin-top:6px; }
+  .verdict{ background:#fff; border-radius:18px; padding:17px 16px; margin-bottom:14px; box-shadow:0 3px 12px rgba(70,120,105,.07); border-left:5px solid #E0894A; }
+  .verdict .vbig{ font-size:20px; font-weight:800; color:#D9803F; }
+  .verdict .vsum{ font-size:13.5px; line-height:1.65; color:#46504A; margin-top:9px; }
+  .simhead{ font-size:15px; font-weight:800; margin:16px 4px 10px; display:flex; align-items:center; gap:6px; }
+  .simhead.no{ color:#D9803F; } .simhead.ok{ color:#2F8E72; }
+  .fcard{ background:#fff; border-radius:15px; padding:13px 15px; margin-bottom:9px; box-shadow:0 3px 12px rgba(70,120,105,.055); transition:opacity .2s; }
+  .fcard .ff{ display:flex; justify-content:space-between; align-items:center; }
+  .fcard .ffn{ font-size:16px; font-weight:800; color:#2E3A35; }
+  .fcard .fmeal{ font-size:10px; color:#A8B2AC; font-weight:700; background:#F3F7F5; border-radius:6px; padding:2px 7px; flex:none; }
+  .fcard .fw{ font-size:13px; color:#525C55; margin-top:7px; line-height:1.55; }
+  .corrbtn{ margin-top:10px; font-size:11.5px; font-weight:700; color:#7C867F; background:#F4F6F5; border:1px solid #E6EBE9; border-radius:9px; padding:7px 12px; cursor:pointer; }
+  .corrbtn:active{ background:#EAEFEC; }
+  .fcard.corrected{ opacity:.55; }
+  .fcard.corrected .fw{ text-decoration:line-through; }
+  .corrnote{ display:none; font-size:11.5px; color:#2F8E72; font-weight:700; margin-top:8px; }
+  .fcard.corrected .corrnote{ display:block; }
+  .fcard.corrected .corrbtn{ display:none; }
   .mealrow{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:1px 0 8px; }
   .mcard{ background:#fff; border-radius:15px; overflow:hidden;
           box-shadow:0 3px 12px rgba(70,120,105,.07); }
@@ -518,6 +542,65 @@ function spark(sc){
     <circle cx="${lx}" cy="${ly}" r="2.6" fill="#37A06E"/></svg>`;
 }
 
+/* ===== 小白简版（大鹏需求：零指标 + 直接吃啥/别吃啥 + 归因 + 用户矫正 + 大白话）=====
+   这是「生成 mini app 时用户可选的参数」：少数据(小白) vs 数据详版(bio hacker)，不是写死界面。*/
+let MODE = localStorage.getItem("everly_mode_solo") || "simple";   /* 默认小白简版 */
+function setMode(m){ MODE=m; try{ localStorage.setItem("everly_mode_solo", m); }catch(e){} renderBody(); }
+function correctItem(btn){ btn.closest(".fcard").classList.toggle("corrected"); }
+
+/* 肠胃今天这顿的「别吃 / 能吃」——食物非常具体，每条带归因(为啥+追到哪顿) */
+const SIMPLE_GUT = {
+  verdict:"今天肠胃 · 要当心 ⚠️",
+  summary:"今天这几样肠胃都受不了：油的、辣的、咸的都赶上了。下面红的今天先躲开，绿的随便吃。",
+  avoid:[
+    {f:"🍟 油条",meal:"今天早餐",why:"太油，肠胃要使劲消化，容易反酸、堵得慌。"},
+    {f:"🌶️ 麻辣香锅",meal:"今天午餐",why:"又辣又油，对你这种敏感胃最容易闹——今天最该躲的就是它。"},
+    {f:"🥛 空腹喝的豆浆",meal:"今天早餐",why:"空肚子喝豆类的东西，容易胀气、咕噜咕噜不舒服。"},
+    {f:"🥬 咸菜",meal:"今天晚餐",why:"太咸，会刺激胃，少夹两筷子。"},
+  ],
+  safe:[
+    {f:"🍚 白粥 / 山药小米粥",why:"温温的、好消化，不胀气，胃最省力。"},
+    {f:"🥚 蒸蛋",why:"软软嫩嫩，蛋白也补到了，胃舒服。"},
+    {f:"🐟 清蒸鱼 / 清蒸鳕鱼",why:"不油、好消化，今天想吃肉就吃它。"},
+    {f:"🎃 南瓜",why:"暖胃、温和，当主食也行。"},
+  ],
+};
+
+function renderSimple(p, x){
+  const s = SIMPLE_GUT;
+  const rec = x.recipes;
+  return `
+    <div class="verdict">
+      <div class="vbig">${s.verdict}</div>
+      <div class="vsum">${s.summary}</div>
+    </div>
+
+    <div class="simhead no">🚫 今天先别吃</div>
+    ${s.avoid.map(a=>`
+      <div class="fcard">
+        <div class="ff"><span class="ffn">${a.f}</span><span class="fmeal">${a.meal}</span></div>
+        <div class="fw">${a.why}</div>
+        <button class="corrbtn" onclick="correctItem(this)">👍 我吃这个其实没事</button>
+        <div class="corrnote">✅ 记下了——以后这个不再提醒你</div>
+      </div>`).join("")}
+
+    <div class="simhead ok">✅ 今天可以放心吃</div>
+    ${s.safe.map(a=>`
+      <div class="fcard">
+        <div class="ff"><span class="ffn">${a.f}</span></div>
+        <div class="fw">${a.why}</div>
+        <button class="corrbtn" onclick="correctItem(this)">👎 我吃这个不舒服</button>
+        <div class="corrnote">✅ 记下了——以后会帮你留意这个</div>
+      </div>`).join("")}
+
+    <div class="simhead ok">🍳 想换着吃，试试这些</div>
+    ${recipeCard(rec[0])}
+    <div class="reciperow ${recipeCollapsed?"collapsed":""}">${rec.slice(1).map(recipeCard).join("")}</div>
+    ${rec.length>1 ? `<div class="foldmore" onclick="toggleRecipes(this)">${recipeCollapsed?`▾ 再看 ${rec.length-1} 道`:"▴ 收起"}</div>` : ""}
+
+    <div class="foot">这是「小白简版」：零指标、直接告诉你吃啥别吃啥，全部追到今天具体哪顿。<br>红的不准？点「我吃这个没事」就能纠正，越用越懂你。<br>想看分数和数据 → 切到上面「📊 数据详版」。wellness 健康管理，不做医疗诊断。</div>`;
+}
+
 let active = 0;
 
 /* 用户可手动拖动板块排序，顺序记到 localStorage */
@@ -691,6 +774,15 @@ function renderBody(){
   const x = EXTRA[p.key];
   const sc = computeScore(p);
   const col = scoreColor(sc);
+  const modeBar = `<div class="modebar"><div class="mrow">
+      <button class="mbtn ${MODE==="simple"?"on":""}" onclick="setMode('simple')">😀 小白简版</button>
+      <button class="mbtn ${MODE==="data"?"on":""}" onclick="setMode('data')">📊 数据详版</button>
+    </div><div class="mhint">这是生成 mini app 时可选的参数 · 小白零指标 / bio hacker 看数据</div></div>`;
+  if(MODE === "simple"){
+    document.getElementById("scroll").innerHTML = modeBar + renderSimple(p, x);
+    document.getElementById("scroll").scrollTop = 0;
+    return;
+  }
   // 各板块内容（可拖拽排序）
   const B = {
     meal: `<div class="mealhd">🍽 今天吃了什么 <span class="mr">共 ${p.meals.length} 餐</span></div>
@@ -716,7 +808,7 @@ function renderBody(){
   const blocks = order.map(k =>
     `<div class="block" draggable="true" data-key="${k}">${B[k]}</div>`).join("");
 
-  document.getElementById("scroll").innerHTML = `
+  document.getElementById("scroll").innerHTML = modeBar + `
     <div class="hero">
       <div class="ring" style="background:conic-gradient(${col} 0 ${sc}%, #EAF1EE ${sc}% 100%)">
         <div class="rin"><div class="rn" style="color:${col}">${sc}</div><div class="rl">营养分</div></div>
@@ -731,7 +823,7 @@ function renderBody(){
     <div class="draghint">按住卡片可拖动排序（顺序会记住）</div>
     <div id="blocks">${blocks}</div>
 
-    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-12 11:15:06</span></div>`;
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-12 11:21:19</span></div>`;
   attachDrag();
   document.getElementById("scroll").scrollTop = 0;
 }
