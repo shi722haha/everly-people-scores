@@ -683,8 +683,10 @@ let recipeCollapsed = (localStorage.getItem("everly_recipe_collapsed_solo") ?? "
 function toggleRecipes(btn){
   recipeCollapsed = !recipeCollapsed;
   try{ localStorage.setItem("everly_recipe_collapsed_solo", recipeCollapsed ? "1" : "0"); }catch(e){}
-  const blk = btn.closest(".block");
-  const row = blk.querySelector(".reciperow");
+  // 不依赖 .block：折叠容器就是按钮前面相邻的 .reciperow（小白版/数据版都适用）
+  let row = btn.previousElementSibling;
+  while(row && !row.classList.contains("reciperow")) row = row.previousElementSibling;
+  if(!row) return;
   row.classList.toggle("collapsed", recipeCollapsed);
   const rest = row.querySelectorAll(".rcard").length;
   btn.textContent = recipeCollapsed ? `▾ 展开另外 ${rest} 道` : "▴ 收起";
@@ -874,7 +876,7 @@ function renderBody(){
     <div class="draghint">按住卡片可拖动排序（顺序会记住）</div>
     <div id="blocks">${blocks}</div>
 
-    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-12 11:44:26</span></div>`;
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-12 11:46:54</span></div>`;
   attachDrag();
   document.getElementById("scroll").scrollTop = 0;
 }
