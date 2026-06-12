@@ -108,7 +108,9 @@
   .detail .track{ height:7px; }
   .detail .gl{ display:flex; justify-content:space-between; font-size:9px; color:#BCC5C0; margin-top:4px; }
   .sstat{ font-size:12.5px; font-weight:700; margin-top:10px; }
-  .swhy{ font-size:12px; color:#525C55; line-height:1.55; margin-top:6px; }
+  .swhy{ font-size:12px; color:#525C55; line-height:1.55; margin-top:8px; }
+  .swhy b{ color:#3E8E73; font-weight:700; }
+  .ssrc{ margin-top:7px; }
   /* 直接指令行 */
   .actline{ display:flex; align-items:center; gap:8px; }
   .actchip{ flex:none; font-size:11px; font-weight:800; padding:3px 10px; border-radius:8px; }
@@ -653,6 +655,8 @@ function simpleRow(f){
     <div class="track" style="margin-top:1px"><div class="band" style="left:${f.band[0]}%;width:${f.band[1]-f.band[0]}%"></div><div class="mark ${mk}" style="left:${f.mark}%"></div></div>
     <div class="gl"><span>少</span><span>刚好</span><span>多</span></div>
     <div class="sstat ${sc}">${f.td} · ${f.lab}</div>
+    ${f.why ? `<div class="swhy"><b>为什么这么说</b>：${f.why}</div>` : ""}
+    ${f.src ? `<div class="ssrc"><span class="src">${f.src}</span></div>` : ""}
   </div></div></div>`;
 }
 
@@ -1008,7 +1012,7 @@ function renderBody(){
     <div class="draghint">按住卡片可拖动排序（顺序会记住）</div>
     <div id="blocks">${blocks}</div>
 
-    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-12 14:41:02</span></div>`;
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-12 14:46:10</span></div>`;
   attachDrag();
   document.getElementById("scroll").scrollTop = 0;
 }
