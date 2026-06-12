@@ -103,6 +103,11 @@
   .cbtn.ok.sel{ background:#E7F4EC; border-color:#9FD3B6; color:#2F8E72; }
   .cbtn.bad.sel{ background:#FBEFE6; border-color:#EEC4A4; color:#D9803F; }
   .corrnote{ display:none; font-size:11.5px; color:#2F8E72; font-weight:700; margin-top:9px; }
+  /* 折叠在因素行里的「多/少」条码 + 说明 */
+  .detail .track{ height:7px; }
+  .detail .gl{ display:flex; justify-content:space-between; font-size:9px; color:#BCC5C0; margin-top:4px; }
+  .sstat{ font-size:12.5px; font-weight:700; margin-top:10px; }
+  .swhy{ font-size:12px; color:#525C55; line-height:1.55; margin-top:6px; }
   .mealrow{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:1px 0 8px; }
   .mcard{ background:#fff; border-radius:15px; overflow:hidden;
           box-shadow:0 3px 12px rgba(70,120,105,.07); }
@@ -577,33 +582,35 @@ const SIMPLE_GUT = {
   ],
 };
 
-/* 把数据版的营养成分行「去专业化」——同一行原样拿回来，名字换成普通食材说法 */
+/* 去专业化：表面只露普通食材名；多/少的条码 + 说明折叠在里面，想查再点开 */
 const PLAIN_GUT = {
-  "高 FODMAP":"爱胀气的（豆浆 / 洋葱 / 蒜 / 豆类）",
-  "刺激性":"辣的 · 咖啡 · 酒 · 碳酸",
-  "脂肪 · 高脂油炸":"油大的（油炸 / 肥肉）",
-  "膳食纤维 · 可溶":"软的好消化纤维（燕麦 / 南瓜 / 山药）",
-  "低脂瘦蛋白":"清淡的瘦肉、鱼（清蒸 / 水煮）",
-  "温热熟食":"热乎的熟食（别太生冷）",
-  "发酵/益生":"发酵的（酸奶 / 纳豆 / 泡菜）",
-  "钠":"太咸的（咸菜 / 腌的）",
-  "进食节奏":"吃饭别太快",
-  "水分":"多喝温水",
+  "高 FODMAP":{n:"爱胀气的（豆浆 / 洋葱 / 蒜）",w:"今天有点多，肚子容易咕噜咕噜、胀气。"},
+  "刺激性":{n:"辣的 · 咖啡 · 酒 · 碳酸",w:"今天踩了，刺激胃、容易反酸。"},
+  "脂肪 · 高脂油炸":{n:"油大的（油炸 / 肥肉）",w:"今天偏多，肠胃要使劲消化、堵得慌。"},
+  "膳食纤维 · 可溶":{n:"软的好消化纤维（燕麦 / 南瓜 / 山药）",w:"今天吃少了，补一点肠胃更顺。"},
+  "低脂瘦蛋白":{n:"清淡的瘦肉、鱼",w:"今天少了点，清蒸水煮的来一份。"},
+  "温热熟食":{n:"热乎的熟食",w:"今天有点生冷，尽量吃热的。"},
+  "发酵/益生":{n:"发酵的（酸奶 / 纳豆 / 泡菜）",w:"今天没吃，适量来点对肠道好。"},
+  "钠":{n:"太咸的（咸菜 / 腌的）",w:"今天偏咸了，少夹两筷子。"},
+  "进食节奏":{n:"吃饭别太快",w:"今天吃得快了点，慢点嚼。"},
+  "水分":{n:"温水",w:"今天还行，继续多喝温的。"},
 };
 function simpleRow(f){
   const sc = f.score>0?"pos":f.score<0?"neg":"mid";
   const mk = markClass(f.mark, f.band);
-  const name = PLAIN_GUT[f.nm] || f.nm;
+  const pg = PLAIN_GUT[f.nm] || {n:f.nm,w:""};
   return `
-  <div class="row"><div class="rtop">
+  <div class="row" onclick="toggle(this)"><div class="rtop">
     <div class="em">${f.em}</div>
-    <div class="col"><div class="nm">${name}</div><div class="td">${f.td}</div></div>
-    <div class="gauge">
-      <div class="track"><div class="band" style="left:${f.band[0]}%;width:${f.band[1]-f.band[0]}%"></div><div class="mark ${mk}" style="left:${f.mark}%"></div></div>
-      <div class="gl"><span>少</span><span>刚好</span><span>多</span></div>
-    </div>
-    <div class="stat"><div class="sl ${sc}">${f.lab}</div></div>
-  </div></div>`;
+    <div class="col"><div class="nm">${pg.n}</div></div>
+    <div class="chev">›</div>
+  </div>
+  <div class="detail"><div class="dinner">
+    <div class="track" style="margin-top:1px"><div class="band" style="left:${f.band[0]}%;width:${f.band[1]-f.band[0]}%"></div><div class="mark ${mk}" style="left:${f.mark}%"></div></div>
+    <div class="gl"><span>少</span><span>刚好</span><span>多</span></div>
+    <div class="sstat ${sc}">${f.td} · ${f.lab}</div>
+    <div class="swhy">${pg.w}</div>
+  </div></div></div>`;
 }
 
 function renderSimple(p, x){
@@ -867,7 +874,7 @@ function renderBody(){
     <div class="draghint">按住卡片可拖动排序（顺序会记住）</div>
     <div id="blocks">${blocks}</div>
 
-    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-12 11:40:10</span></div>`;
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-12 11:44:26</span></div>`;
   attachDrag();
   document.getElementById("scroll").scrollTop = 0;
 }
