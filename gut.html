@@ -394,7 +394,7 @@ const PEOPLE = [
     {s:"早餐",ic:"🌅",t:"7:30",dish:"豆浆油条",q:0,img:"soy milk with fried dough sticks youtiao chinese",items:["豆浆","油条"]},
     {s:"午餐",ic:"☀️",t:"12:30",dish:"麻辣香锅",q:0,img:"spicy mala xiang guo sichuan",items:["麻辣香锅"]},
     {s:"晚餐",ic:"🌙",t:"18:30",dish:"稀饭咸菜",q:1,img:"rice porridge with pickles chinese",items:["稀饭","咸菜"]}],
-  read:"高FODMAP、辣、油炸全踩了——今天对肠胃几乎条条是雷。",
+  read:"今天这几样肠胃都受不了：早上的油条太油、豆浆爱胀气，中午麻辣香锅又辣又油，晚上的咸菜太咸——能换就换。",
   creed:"敏感不等于“纤维=坏、越少越好”。<b>纤维照样吃够，只是换可溶、温和、慢慢加</b>；真正减分的是产气、高脂、刺激这些诱因。",
   priority:[
     {em:"🧅",nm:"高 FODMAP",td:"今日踩雷",band:[0,30],mark:72,score:-7,lab:"偏多",
@@ -472,7 +472,7 @@ const EXTRA = {
     deep:{ title:"🔬 影响你肠胃的因素（不只是食物）",
       lead:"你这几天在出差、作息被打乱，肠胃比平时更脆弱。今天的雷主要来自空腹咖啡和那顿麻辣香锅——不全是食物本身，压力和睡眠也在拖后腿。",
       tiers:[
-        {k:"确认诱因",sub:"已多信号交叉验证",color:"red",items:["空腹喝咖啡","出差·作息打乱","高脂·油炸","高FODMAP(豆/蒜)","辛辣刺激"]},
+        {k:"确认诱因",sub:"已多信号交叉验证",color:"red",items:["空腹喝咖啡","出差·作息打乱","油炸·太油","豆浆/洋葱/蒜·爱胀气","辛辣刺激"]},
         {k:"观察中",sub:"证据攒够才升为确认",color:"amber",items:["睡眠不足","压力大","睡前进食","两餐间隔太长","吃太快"]},
         {k:"可安心",sub:"温和好消化",color:"green",items:["白粥","蒸蛋","清蒸鱼","山药小米粥","南瓜"]}],
       note:"非食物诱因（作息 / 压力 / 睡眠）和食物一起进分。来自四层记忆 + 多信号交叉验证，绝不单信号下结论；真改善了，尺子随你上移。" },
@@ -731,7 +731,7 @@ function renderBody(){
     <div class="draghint">按住卡片可拖动排序（顺序会记住）</div>
     <div id="blocks">${blocks}</div>
 
-    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-11 18:45:38</span></div>`;
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-12 11:15:06</span></div>`;
   attachDrag();
   document.getElementById("scroll").scrollTop = 0;
 }
