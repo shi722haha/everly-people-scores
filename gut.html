@@ -89,6 +89,15 @@
   .verdict{ background:#fff; border-radius:18px; padding:17px 16px; margin-bottom:14px; box-shadow:0 3px 12px rgba(70,120,105,.07); border-left:5px solid #E0894A; }
   .verdict .vbig{ font-size:20px; font-weight:800; color:#D9803F; }
   .verdict .vsum{ font-size:13.5px; line-height:1.65; color:#46504A; margin-top:9px; }
+  /* 顶部 AI 解读卡（仿 bevel：标题+一段话+简单4档，无趋势图） */
+  .btop{ background:#fff; border-radius:18px; padding:18px 17px 16px; margin-bottom:14px; box-shadow:0 3px 12px rgba(70,120,105,.07); }
+  .btop .beyebrow{ font-size:10.5px; font-weight:800; letter-spacing:.06em; }
+  .btop .bhead{ font-size:21px; font-weight:800; color:#2C3A33; margin:5px 0 9px; line-height:1.28; }
+  .btop .bpara{ font-size:13.5px; line-height:1.66; color:#46504A; margin-bottom:15px; }
+  .btier{ display:flex; gap:5px; }
+  .bseg{ flex:1; text-align:center; font-size:11.5px; font-weight:700; color:#AEB6B1;
+         background:#F1F4F2; border-radius:9px; padding:9px 2px 8px; transition:.2s; }
+  .bseg.on{ color:#fff; box-shadow:0 3px 9px rgba(0,0,0,.13); transform:translateY(-1px); }
   .simhead{ font-size:15px; font-weight:800; margin:16px 4px 10px; display:flex; align-items:center; gap:6px; }
   .simhead.no{ color:#D9803F; } .simhead.ok{ color:#2F8E72; }
   .fcard{ background:#fff; border-radius:15px; padding:13px 15px; margin-bottom:9px; box-shadow:0 3px 12px rgba(70,120,105,.055); transition:opacity .2s; }
@@ -741,14 +750,29 @@ function toggleGoal(btn){
   btn.textContent = more.classList.contains("collapsed") ? "换个目标 / 自己写 ▾" : "收起 ▴";
 }
 
+/* 顶部 AI 解读卡（仿 bevel）：标题 + 一段解读 + 简单 4 档（无趋势折线图）。
+   档位由总营养分换算，和数据版同源，无数字。 */
+const TIERS = [
+  {k:"要当心", c:"#E0894A", head:"今天条条都踩雷"},
+  {k:"一般",   c:"#E3B34D", head:"今天肠胃 · 一般"},
+  {k:"还不错", c:"#7CC4A4", head:"今天吃得还不错"},
+  {k:"很省心", c:"#4FC0A1", head:"今天肠胃 · 很省心"},
+];
+function todayTier(p){ const s=computeScore(p); return s>=78?3:s>=64?2:s>=50?1:0; }
+function bevelTop(p){
+  const i=todayTier(p), t=TIERS[i];
+  return `<div class="btop">
+    <div class="beyebrow" style="color:${t.c}">今天 · ${t.k} · 共 ${p.meals.length} 餐</div>
+    <div class="bhead">${t.head} ✨</div>
+    <div class="bpara">${SIMPLE_GUT.summary}</div>
+    <div class="btier">${TIERS.map((x,j)=>`<span class="bseg ${j===i?"on":""}" style="${j===i?`background:${x.c}`:""}">${x.k}</span>`).join("")}</div>
+  </div>`;
+}
 function renderSimple(p, x){
   const s = SIMPLE_GUT;
   const rec = x.recipes;
   return `
-    <div class="verdict">
-      <div class="vbig">${s.verdict}</div>
-      <div class="vsum">${s.summary}</div>
-    </div>
+    ${bevelTop(p)}
 
     <div class="mealhd">🍽 今天吃了什么 <span class="mr">共 ${p.meals.length} 餐 · 已帮你记下</span></div>
     <div class="mealrow">${p.meals.map(mealCard).join("")}</div>
@@ -1022,7 +1046,7 @@ function renderBody(){
     <div class="draghint">按住卡片可拖动排序（顺序会记住）</div>
     <div id="blocks">${blocks}</div>
 
-    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-13 · 宏量卡小白版去克数(多了/少了/刚好)</span></div>`;
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-13 · 顶部AI解读+简单4档(仿bevel去趋势图)</span></div>`;
   attachDrag();
   document.getElementById("scroll").scrollTop = 0;
 }
