@@ -89,16 +89,6 @@
   .verdict{ background:#fff; border-radius:18px; padding:17px 16px; margin-bottom:14px; box-shadow:0 3px 12px rgba(70,120,105,.07); border-left:5px solid #E0894A; }
   .verdict .vbig{ font-size:20px; font-weight:800; color:#D9803F; }
   .verdict .vsum{ font-size:13.5px; line-height:1.65; color:#46504A; margin-top:9px; }
-  /* 今天 · 4 档评价（像 oura/bevel 最上面，但不要数字） */
-  .tscale{ background:#fff; border-radius:18px; padding:16px 16px 17px; margin-bottom:14px; box-shadow:0 3px 12px rgba(70,120,105,.07); }
-  .tslabel{ font-size:13px; font-weight:700; color:#8A938D; }
-  .tsnow{ font-size:21px; font-weight:800; margin:3px 0 12px; }
-  .tsbar{ display:flex; gap:5px; }
-  .tseg{ flex:1; text-align:center; font-size:11.5px; font-weight:700; color:#AEB6B1;
-         background:#F1F4F2; border-radius:9px; padding:9px 2px 8px; position:relative; transition:.2s; }
-  .tseg.on{ color:#fff; box-shadow:0 3px 9px rgba(224,137,74,.28); transform:translateY(-1px); }
-  .tseg.on::after{ content:"●"; position:absolute; top:-9px; left:50%; transform:translateX(-50%); font-size:8px; }
-  .tssum{ font-size:13.5px; line-height:1.65; color:#46504A; margin-top:13px; }
   .simhead{ font-size:15px; font-weight:800; margin:16px 4px 10px; display:flex; align-items:center; gap:6px; }
   .simhead.no{ color:#D9803F; } .simhead.ok{ color:#2F8E72; }
   .fcard{ background:#fff; border-radius:15px; padding:13px 15px; margin-bottom:9px; box-shadow:0 3px 12px rgba(70,120,105,.055); transition:opacity .2s; }
@@ -556,8 +546,7 @@ const EXTRA = {
         {k:"确认诱因",sub:"已多信号交叉验证",color:"red",items:["空腹喝咖啡","出差·作息打乱","油炸·太油","豆浆/洋葱/蒜·爱胀气","辛辣刺激"]},
         {k:"观察中",sub:"证据攒够才升为确认",color:"amber",items:["睡眠不足","压力大","睡前进食","两餐间隔太长","吃太快"]},
         {k:"可安心",sub:"温和好消化",color:"green",items:["白粥","蒸蛋","清蒸鱼","山药小米粥","南瓜"]}],
-      note:"非食物诱因（作息 / 压力 / 睡眠）和食物一起进分。来自四层记忆 + 多信号交叉验证，绝不单信号下结论；真改善了，尺子随你上移。",
-      noteSimple:"不光是吃的——出差、没睡好、压力大也会让肠胃闹。一样会算进去。你慢慢好起来，我也跟着放宽。" },
+      note:"非食物诱因（作息 / 压力 / 睡眠）和食物一起进分。来自四层记忆 + 多信号交叉验证，绝不单信号下结论；真改善了，尺子随你上移。" },
     recipes:[
       {n:"山药小米粥",cui:"家常",img:"yam millet porridge chinese",fit:"温和可溶纤维 + 养胃，不产气",swap:"油条换山药粥，去掉高脂诱因"},
       {n:"清蒸鳕鱼",cui:"粤式",img:"steamed cod fish cantonese",fit:"低脂瘦蛋白 + 温热好消化",swap:""},
@@ -752,28 +741,14 @@ function toggleGoal(btn){
   btn.textContent = more.classList.contains("collapsed") ? "换个目标 / 自己写 ▾" : "收起 ▴";
 }
 
-/* 今天 · 4 档评价（无数字，像 oura/bevel 最上面）。档位由总营养分换算，和数据版同源 */
-const TIERS = [
-  {k:"要当心", c:"#E0894A", now:"今天肠胃 · 要当心"},
-  {k:"一般",   c:"#E3B34D", now:"今天肠胃 · 一般"},
-  {k:"还不错", c:"#7CC4A4", now:"今天肠胃 · 还不错"},
-  {k:"很省心", c:"#4FC0A1", now:"今天肠胃 · 很省心"},
-];
-function todayTier(p){ const s=computeScore(p); return s>=78?3:s>=64?2:s>=50?1:0; }
-function todayScale(p){
-  const i = todayTier(p), t = TIERS[i];
-  return `<div class="tscale">
-    <div class="tslabel">今天肠胃</div>
-    <div class="tsnow" style="color:${t.c}">${t.now.split(" · ")[1]}</div>
-    <div class="tsbar">${TIERS.map((x,j)=>`<span class="tseg ${j===i?"on":""}" style="${j===i?`background:${x.c}`:""}">${x.k}</span>`).join("")}</div>
-    <div class="tssum">${SIMPLE_GUT.summary}</div>
-  </div>`;
-}
 function renderSimple(p, x){
   const s = SIMPLE_GUT;
   const rec = x.recipes;
   return `
-    ${todayScale(p)}
+    <div class="verdict">
+      <div class="vbig">${s.verdict}</div>
+      <div class="vsum">${s.summary}</div>
+    </div>
 
     <div class="mealhd">🍽 今天吃了什么 <span class="mr">共 ${p.meals.length} 餐 · 已帮你记下</span></div>
     <div class="mealrow">${p.meals.map(mealCard).join("")}</div>
@@ -944,6 +919,16 @@ function mealCard(m){
 function macroBar(lab,arr,col){
   const pct = Math.min(100, Math.round(arr[0]/arr[1]*100));
   const over = arr[0] > arr[1];
+  // 小白版：不写克数，只给笼统判断（多了 / 刚好 / 少了）；数据详版仍显示克数
+  if(MODE === "simple"){
+    const r = arr[0]/arr[1];
+    const word = r>=1.05 ? "多了点" : r<=0.85 ? "少了点" : "刚好";
+    const wc   = word==="刚好" ? "#2F8E72" : "#D9803F";
+    return `<div class="one">
+      <div class="lab"><span>${lab}</span><span style="color:${wc};font-weight:800">${word}</span></div>
+      <div class="bar"><div class="bf" style="width:${pct}%;background:${over?'#E0894A':col}"></div></div>
+    </div>`;
+  }
   return `<div class="one">
     <div class="lab"><span>${lab}</span><span><b>${arr[0]}</b>/${arr[1]}g</span></div>
     <div class="bar"><div class="bf" style="width:${pct}%;background:${over?'#E0894A':col}"></div></div>
@@ -961,25 +946,23 @@ function recipeCard(r){
   </div>`;
 }
 function deepHTML(d){
-  const simple = (MODE === "simple");
-  const head = `<div class="ai-eyebrow"${simple?' style="background:#EEF3F0;color:#6E8A7E"':""}>${simple?"💬 多说一句":"✨ AI 洞察 · 基于你的数据生成"}</div>
+  const head = `<div class="ai-eyebrow">✨ AI 洞察 · 基于你的数据生成</div>
     <div class="dt">${d.title}</div>
     ${d.lead ? `<div class="ai-lead">${d.lead}</div>` : ""}
     ${d.intent ? `<div class="ai-mini">${d.intent}</div>` : ""}`;
-  const note = simple ? (d.noteSimple || d.note) : d.note;
   let body;
   if(d.tiers){
     const col={red:["#D9803F","#FBEFE6"],amber:["#C99A2E","#FAF4E4"],green:["#2F8E72","#E5F3EC"]};
     body = `${d.tiers.map(t=>{const c=col[t.color];return `
-        <div class="tier"><div class="th"><span class="dot" style="background:${c[0]}"></span>${t.k}${simple?"":`<span class="sub">${t.sub}</span>`}</div>
+        <div class="tier"><div class="th"><span class="dot" style="background:${c[0]}"></span>${t.k}<span class="sub">${t.sub}</span></div>
           <div class="chips">${t.items.map(i=>`<span class="c" style="color:${c[0]};background:${c[1]}">${i}</span>`).join("")}</div>
         </div>`;}).join("")}
-      <div class="dnote">${note}</div>`;
+      <div class="dnote">${d.note}</div>`;
   } else {
     body = `<div class="ldg">${d.ledger.map(l=>`<div class="row2"><span class="lk">${l.k}</span><span class="lv">${l.v}</span></div>`).join("")}</div>
       <div class="th2">非食物维度 · 影响你今天要补多少</div>
       <div class="chips">${d.factors.map(f=>`<span class="c" style="color:#7C6FB0;background:#F1EFF9">${f}</span>`).join("")}</div>
-      <div class="dnote">${note}</div>`;
+      <div class="dnote">${d.note}</div>`;
   }
   return `<div class="deep insight">${head}
     <div class="deepbody ${deepCollapsed?"collapsed":""}">${body}</div>
@@ -1039,7 +1022,7 @@ function renderBody(){
     <div class="draghint">按住卡片可拖动排序（顺序会记住）</div>
     <div id="blocks">${blocks}</div>
 
-    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-13 · 今日4档评价 + 小白版降AI味</span></div>`;
+    <div class="foot">营养分 = 按每条“今日落点 vs 你的区间”加权，与因素行同源。<br>餐食图为 AI 生成示意；菜谱按八大菜系 + 食材替换思路推荐。<br>卡片顺序可拖动调整。所有区间与加减分基于公开科学，可追溯。wellness 健康管理，不做医疗诊断。<br><span class="build" style="color:#B9C2BC">构建 06-13 · 宏量卡小白版去克数(多了/少了/刚好)</span></div>`;
   attachDrag();
   document.getElementById("scroll").scrollTop = 0;
 }
