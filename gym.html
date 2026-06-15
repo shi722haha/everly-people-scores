@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>肠胃脆弱 · 单页对比版</title>
+<title>健身增肌 · 单页对比版</title>
 <style>
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0; }
   body{ background:#D9DEE1; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
@@ -503,7 +503,7 @@ const PEOPLE = [
 ];
 
 /* ☆☆ 这一页是哪个人群的独立版：只改这一个常量即可（gym/mom/old/veg/glu/gut）。其余结构完全一致 ☆☆ */
-const SOLO_KEY = "gut";
+const SOLO_KEY = "gym";
 const SS = "_" + SOLO_KEY;   /* localStorage 后缀：保证各独立页互不串状态（GH Pages 同源） */
 PEOPLE.splice(0, PEOPLE.length, PEOPLE.find(p=>p.key===SOLO_KEY));   /* 独立单页：只留这一个人群 */
 
